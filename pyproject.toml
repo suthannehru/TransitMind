@@ -1,0 +1,22 @@
+[project]
+name = "TrackWise"
+version = "0.1.0"
+description = "A natural-language assistant for the NYC subway system"
+requires-python = ">=3.11"
+dependencies = [
+   "fastapi",
+   "uvicorn",
+   "pydantic-settings",
+   "structlog",
+   "httpx",
+   "redis",
+   "qdrant-client",
+   "sentence-transformers",
+   "gtfs-realtime-bindings",
+   "networkx",
+   "anthropic",
+   "openai",
+   "mcp",
+   "pytest",
+   "ragas"
+]
