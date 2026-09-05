@@ -1,4 +1,4 @@
-# Environment Variablesi (Secrets)
+# Environment Variables (Secrets)
 .env
 
 # Data Content
@@ -12,3 +12,11 @@ __pycache__
 
 # Desktop Services Store (metadata file by macOS)
 .DS_Store
+
+# Editor Dirs
+./vscode
+
+# Additional Python files
+*.pyc
+.pytest_cache/
+*.egg-info//build//dist/

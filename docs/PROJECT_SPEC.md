@@ -1,4 +1,4 @@
-# TrackWise — NYC Transit Agentic RAG Assistant
+# TransitMind — NYC Transit Agentic RAG Assistant
 
 ## What this is
 
@@ -19,7 +19,7 @@ Most RAG portfolio projects fail on one of two axes:
 - **Value** — does a real person actually want this, or does it just wrap a dataset that a normal search UI already handles fine?
 - **Complexity** — does it force you past "embed → vector search → stuff into prompt," or is it ETL with an embedding step bolted on?
 
-TrackWise clears both:
+TransitMind clears both:
 
 - **Value:** every NYC commuter has asked "is my train messed up right now" — a real, personal, frequent question that isn't well served by existing tools.
 - **Complexity:** static-vs-live data fusion, protobuf parsing, graph pathfinding, and tool-selection logic are all genuinely hard problems — not busywork.
