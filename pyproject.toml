@@ -18,5 +18,7 @@ dependencies = [
    "openai",
    "mcp",
    "pytest",
-   "ragas"
+   "ragas",
+   "pandas",
+   "networkx"
 ]
