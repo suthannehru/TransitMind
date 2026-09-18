@@ -1,5 +1,5 @@
 [project]
-name = "TrackWise"
+name = "TransitMind"
 version = "0.1.0"
 description = "A natural-language assistant for the NYC subway system"
 requires-python = ">=3.11"
