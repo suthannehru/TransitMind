@@ -1,5 +1,6 @@
 import pandas as pd
 import networkx as nx
+import pickle
 
 
 def build_station_graph() -> nx.Graph:
@@ -37,4 +38,6 @@ def build_station_graph() -> nx.Graph:
 
 if __name__ == "__main__":
     G = build_station_graph()
+    with open("data/graph.pkl", "wb") as f:
+        pickle.dump(G, f)
     print(G)
