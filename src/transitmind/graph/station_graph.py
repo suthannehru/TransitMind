@@ -38,6 +38,9 @@ def build_station_graph() -> nx.Graph:
 
 if __name__ == "__main__":
     G = build_station_graph()
-    with open("data/graph.pkl", "wb") as f:
-        pickle.dump(G, f)
-    print(G)
+    with open("data/graph.pkl", "wb") as wf:
+        pickle.dump(G, wf)
+    with open("data/graph.pkl", "rb") as rf:
+        metro_graph = pickle.load(rf) 
+
+    print(nx.shortest_path(metro_graph, "F02", "F15"))
