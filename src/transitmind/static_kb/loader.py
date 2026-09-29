@@ -3,16 +3,16 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 from sentence_transformers import SentenceTransformer
 
+# Sentence Transformer
+# L6 means 6 transformer layers
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 def load_vector_db() -> None:
     # Retrieve the relevant data
     df_routes = pd.read_csv("data/gtfs_subway/routes.txt")
     df_stops = pd.read_csv("data/gtfs_subway/stops.txt")
     df_stop_times = pd.read_csv("data/gtfs_subway/stop_times.txt")
     df_trips = pd.read_csv("data/gtfs_subway/trips.txt")
-
-    # Sentence Transformer
-    # L6 means 6 transformer layers
-    model = SentenceTransformer('all-MiniLM-L6-v2')
 
     # Only take the northbound stop of every station (Avoid Duplicates)
     stops = df_stops[df_stops["stop_id"].str.endswith(('N', 'S'))]
