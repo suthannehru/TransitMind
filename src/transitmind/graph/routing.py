@@ -17,7 +17,7 @@ def find_route(start_stop_id: str, end_stop_id: str):
     else:
         raise ValueError("Start and/or End Stop ID is invalid")        
 
-    return route
+    return [G.nodes[stop_id]["name"] for stop_id in route]
 
     
 
