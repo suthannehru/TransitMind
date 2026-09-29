@@ -27,6 +27,8 @@ def build_station_graph() -> nx.Graph:
 
         for stop in stops:
             parent_stop = df_stops.loc[stop, "parent_station"]
+            stop_name = df_stops.loc[stop, "stop_name"]
+            metro.add_node(parent_stop, name=stop_name)
             # Add an edge between the previous stop and 
             # your current stop in the trip
             if prev_stop is not None:
