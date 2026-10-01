@@ -8,13 +8,13 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 def parse_route_query(query: str) -> tuple[str, str]:
 
     # Split the query string using to by searching in revers
-    split_index = query.rfind("to")
+    split_index = query.rfind(" to ")
 
     if split_index == -1:
         raise ValueError("Query not correctly formatted")
     
     start_vector = model.encode(query[:split_index])
-    end_vector = model.encode(query[split_index + len('to'):].strip(" ?.,!"))
+    end_vector = model.encode(query[split_index + len(' to '):].strip(" ?.,!"))
 
     # Connect to the Qdrant Vector Database
     client = QdrantClient(host="localhost", port="6333")
