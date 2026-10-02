@@ -15,6 +15,11 @@ def build_station_graph() -> nx.Graph:
     # Set index on "stop_id" column to make searching O(1)
     df_stops = df_stops.set_index("stop_id")
 
+    # Load the transfers between stations
+    df_transfers = pd.read_csv("data/gtfs_subway/transfers.txt")
+
+    transfers = df_transfers[df_transfers["from_stop_id"] != df_transfers["to_stop_id"]]
+
     metro = nx.Graph()
 
     # Group all trip ID rows together and retrieve the unique stop_id values
@@ -34,6 +39,10 @@ def build_station_graph() -> nx.Graph:
                 metro.add_edge(prev_stop, parent_stop)
             
             prev_stop = parent_stop
+
+    # Adding edges between stations with transfers
+    for transfer in transfers.itertuples():
+        metro.add_edge(transfer.from_stop_id, transfer.to_stop_id)
 
     return metro
 
