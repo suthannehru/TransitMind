@@ -1,7 +1,6 @@
-import pandas as pd
 import networkx as nx
+import pandas as pd
 import pickle
-
 
 def build_station_graph() -> nx.Graph:
     # Load the stop_times.txt with all the trips
