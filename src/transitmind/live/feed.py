@@ -1,8 +1,8 @@
 from google.transit import gtfs_realtime_pb2
 import httpx
-import logging
+import structlog
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
 
 def get_api_suffix(line):
     line_api = {"/1/2/3/4/5/6/7/GS/" : "nyct%2Fgtfs",
@@ -86,5 +86,7 @@ def get_service_alerts(line):
     return alerts
 
 if __name__ == "__main__":
-    logger.info(f"{get_live_postitions('1')}")
-    logger.info(f"{get_service_alerts('F')}")
+    glp_params = ('1',)
+    gsa_params = ('F',)
+    logger.info("get_live_postitions", params=glp_params, output=get_live_postitions(*glp_params))
+    logger.info("get_service_alerts", params=gsa_params, output=get_service_alerts(*gsa_params))
