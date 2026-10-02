@@ -1,7 +1,8 @@
 import structlog
 
 def configure_logging(log_level: str) -> None:
-    
+
+    # So need to define the log level threshold
     structlog.configure(
         processors=[
             # Filter by severity levels

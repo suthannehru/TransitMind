@@ -1,5 +1,8 @@
-import httpx
 from google.transit import gtfs_realtime_pb2
+import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_api_suffix(line):
     line_api = {"/1/2/3/4/5/6/7/GS/" : "nyct%2Fgtfs",
@@ -83,5 +86,5 @@ def get_service_alerts(line):
     return alerts
 
 if __name__ == "__main__":
-    #print(get_live_postitions("1"))
-    print(get_service_alerts("F"))
+    logger.info(f"{get_live_postitions('1')}")
+    logger.info(f"{get_service_alerts('F')}")

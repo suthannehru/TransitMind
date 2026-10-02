@@ -1,5 +1,8 @@
+import logging
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
+
+logger = logging.getLogger(__name__)
 
 # Sentence Transformer
 # L6 means 6 transformer layers

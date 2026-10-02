@@ -1,5 +1,8 @@
+import logging
 import networkx as nx
 import pickle
+
+logger = logging.getLogger(__name__)
 
 def find_route(start_stop_id: str, end_stop_id: str):
 
@@ -22,5 +25,5 @@ def find_route(start_stop_id: str, end_stop_id: str):
     
 
 if __name__ == "__main__":
-    print(find_route('S01', 'F02'))
+    logger.info(f"{find_route('S01', 'F02')}")
     

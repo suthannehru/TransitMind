@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 import json
+import logging
 from openai import OpenAI
 from pydantic import BaseModel
 from transitmind.config import Settings
@@ -81,6 +82,10 @@ llm_tools = [
 # Instantiate settings
 settings = Settings()
 
+# Set Logging
+logging.basicConfig(level=settings.log_level.upper())
+logger = logging.getLogger(__name__)
+
 # Create LLM Client
 client = OpenAI(api_key=settings.openai_api_key)
 
@@ -116,15 +121,15 @@ def agent_loop(query: str):
                 args = json.loads(tool.function.arguments)
                 output = func(**args)
                 messages.append({"role": "tool", "content": json.dumps(output), "tool_call_id": tool.id})
-                #print(output)
+                logger.info(f"For iteration {agent_iter}, the output is {output}")
             except KeyError:
-                print(f"The tool: {tool.function.name} is not available")
+                logger.error(f"The tool: {tool.function.name} is not available")
 
         agent_iter += 1
 
 
-    print(f"It took {agent_iter} iterations to come to a conclusion")
-    print(response_choice.message.content)
+    logger.info(f"It took {agent_iter} iterations to come to a conclusion")
+    logger.info(response_choice.message.content)
 
     return response_choice.message.content
 
