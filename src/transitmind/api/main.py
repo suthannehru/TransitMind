@@ -120,10 +120,16 @@ def agent_loop(query: str):
                 func = tools_str_func[tool.function.name]
                 args = json.loads(tool.function.arguments)
                 output = func(**args)
-                messages.append({"role": "tool", "content": json.dumps(output), "tool_call_id": tool.id})
+                content = json.dumps(output)
                 logger.info(f"For iteration {agent_iter}, the output is {output}")
-            except KeyError:
+            except KeyError as k:
+                content = str(k)
                 logger.error(f"The tool: {tool.function.name} is not available")
+            except ValueError as v:
+                content = str(v)
+                logger.error(f"Not a valid query")
+            
+            messages.append({"role": "tool", "content": content, "tool_call_id": tool.id})
 
         agent_iter += 1
 
@@ -147,10 +153,7 @@ app = FastAPI()
 def ask(request: AskRequest):
     try:
         answer = agent_loop(request.question)
-    except ValueError as e:
+    except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
     
     return {"answer": answer}
-
-
-#"How do i go from 169 St to Sheepshead Bay ?"
