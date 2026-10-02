@@ -1,7 +1,11 @@
+import logging
 import structlog
 
 def configure_logging(log_level: str) -> None:
 
+    # Set the log level in the stdlib logging object
+    logging.basicConfig(level=log_level.upper())
+    
     # So need to define the log level threshold
     structlog.configure(
         processors=[
@@ -15,5 +19,7 @@ def configure_logging(log_level: str) -> None:
             structlog.processors.format_exc_info,
             # Take final dictionary as string
             structlog.processors.JSONRenderer()
-        ]
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger
     )

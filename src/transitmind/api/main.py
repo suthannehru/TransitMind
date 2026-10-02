@@ -3,9 +3,11 @@ import json
 import logging
 from openai import OpenAI
 from pydantic import BaseModel
+import structlog
 from transitmind.config import Settings
 from transitmind.graph.routing import find_route
 from transitmind.live.feed import get_live_postitions, get_service_alerts
+from transitmind.logging_config import configure_logging
 from transitmind.resolver import parse_route_query
 
 # Number of responses from the LLM to look at
@@ -83,8 +85,8 @@ llm_tools = [
 settings = Settings()
 
 # Set Logging
-logging.basicConfig(level=settings.log_level.upper())
-logger = logging.getLogger(__name__)
+configure_logging(log_level=settings.log_level)
+logger = structlog.getLogger(__name__)
 
 # Create LLM Client
 client = OpenAI(api_key=settings.openai_api_key)
@@ -121,21 +123,20 @@ def agent_loop(query: str):
                 args = json.loads(tool.function.arguments)
                 output = func(**args)
                 content = json.dumps(output)
-                logger.info(f"For iteration {agent_iter}, the output is {output}")
+                logger.info("tool_output", iteration=agent_iter, output=output)
             except KeyError as k:
                 content = str(k)
-                logger.error(f"The tool: {tool.function.name} is not available")
+                logger.error("tool_output_err", function=tool.function.name)
             except ValueError as v:
                 content = str(v)
-                logger.error(f"Not a valid query")
+                logger.error("tool_output_err", err="Not a valid query")
             
             messages.append({"role": "tool", "content": content, "tool_call_id": tool.id})
 
         agent_iter += 1
 
 
-    logger.info(f"It took {agent_iter} iterations to come to a conclusion")
-    logger.info(response_choice.message.content)
+    logger.info("final_tool_output", iteration=agent_iter, output=response_choice.message.content)
 
     return response_choice.message.content
 

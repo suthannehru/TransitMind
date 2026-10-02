@@ -1,8 +1,8 @@
-import logging
+import structlog
 import networkx as nx
 import pickle
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
 
 def find_route(start_stop_id: str, end_stop_id: str):
 
@@ -25,5 +25,6 @@ def find_route(start_stop_id: str, end_stop_id: str):
     
 
 if __name__ == "__main__":
-    logger.info(f"{find_route('S01', 'F02')}")
+    params = ('S01', 'F02')
+    logger.info("find_route", params=params, output=find_route(*params))
     
