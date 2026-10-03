@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def parse_route_query(query: str) -> tuple[str, str]:
+    """Splits a natural language question, 'X' to 'Y' and returns a tuple of start and end stop IDs"""
 
     # Split the query string using to by searching in revers
     split_index = query.rfind(" to ")

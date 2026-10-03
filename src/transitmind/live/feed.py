@@ -4,7 +4,7 @@ import structlog
 
 logger = structlog.getLogger(__name__)
 
-def get_api_suffix(line):
+def get_api_suffix(line: str) -> str:
     line_api = {"/1/2/3/4/5/6/7/GS/" : "nyct%2Fgtfs",
                 "/A/C/E/" : "nyct%2Fgtfs-ace",
                 "/B/D/F/M/": "nyct%2Fgtfs-bdfm",
@@ -26,7 +26,9 @@ def get_api_suffix(line):
 # Object follows the data schema
 feed = gtfs_realtime_pb2.FeedMessage()
 
-def get_live_postitions(line):
+def get_live_postitions(line: str) -> list[dict]:
+    """Given a line, return a list of dictionaries for every active train on that line"""
+
     api_suffix = get_api_suffix(line)
     if not api_suffix:
         return None
@@ -52,7 +54,9 @@ def get_live_postitions(line):
 
     return positions
 
-def get_service_alerts(line):
+def get_service_alerts(line: str) -> list[dict]:
+    """Given a line, return a list of dictionaries for every service alert on that line"""
+
     api_suffix = get_api_suffix(line)
     if not api_suffix:
         return None

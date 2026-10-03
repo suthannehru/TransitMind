@@ -25,7 +25,7 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "find_route",
-            "description": "(graph/routing.py)Loads the station map and returns the shortest path between the stops as a list of station names",
+            "description": "Loads the station map and returns the shortest path between the stops as a list of station names",
             "parameters": {
                 "type": "object",
                 "properties": {

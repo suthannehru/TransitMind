@@ -4,7 +4,8 @@ import pickle
 
 logger = structlog.getLogger(__name__)
 
-def find_route(start_stop_id: str, end_stop_id: str):
+def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
+    """ Loads the station map and returns the shortest path between the stops as a list of station names """
 
     # Load the binary pickle file and populate the station graph
     with open("data/graph.pkl", "rb") as f:
