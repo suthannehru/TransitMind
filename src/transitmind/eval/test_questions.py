@@ -83,7 +83,7 @@ test_questions = [
   {
     "question": "How can I get from Flushing-Main St to Mets-Willets Point?",
     "expected_tools": ["parse_route_query", "find_route"],
-    "expected_args": {"find_route": {"start_stop_id": "701", "end_stop_id": "705"}},
+    "expected_args": {"find_route": {"start_stop_id": "701", "end_stop_id": "702"}},
     "category": "routing"
   },
   {
@@ -149,7 +149,7 @@ test_questions = [
   {
     "question": "I'm at Mets-Willets Point. How do I get back to Flushing-Main St?",
     "expected_tools": ["parse_route_query", "find_route"],
-    "expected_args": {"find_route": {"start_stop_id": "705", "end_stop_id": "701"}},
+    "expected_args": {"find_route": {"start_stop_id": "702", "end_stop_id": "701"}},
     "category": "routing"
   },
   {
@@ -553,7 +553,7 @@ test_questions = [
     "question": "How do I get from Flushing-Main St to Mets-Willets Point, and where are the 7 trains right now?",
     "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
     "expected_args": {
-      "find_route": {"start_stop_id": "701", "end_stop_id": "705"},
+      "find_route": {"start_stop_id": "701", "end_stop_id": "702"},
       "get_live_positions": {"line": "7"}
     },
     "category": "routing_train_position"
@@ -645,7 +645,7 @@ test_questions = [
     "question": "How do I get from Flushing-Main St to Mets-Willets Point, are there any 7 train delays, and where are the trains right now?",
     "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
-      "find_route": {"start_stop_id": "701", "end_stop_id": "705"},
+      "find_route": {"start_stop_id": "701", "end_stop_id": "702"},
       "get_service_alerts": {"line": "7"},
       "get_live_positions": {"line": "7"}
     },
@@ -803,7 +803,7 @@ test_questions = [
     "question": "need to go Flushing-Main St Mets-Willets Point",
     "expected_tools": ["parse_route_query", "find_route"],
     "expected_args": {
-      "find_route": {"start_stop_id": "701", "end_stop_id": "705"}
+      "find_route": {"start_stop_id": "701", "end_stop_id": "702"}
     },
     "category": "messy_input"
   },

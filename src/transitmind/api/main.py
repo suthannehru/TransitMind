@@ -25,7 +25,8 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "find_route",
-            "description": "Loads the station map and returns the shortest path between the stops as a list of station names",
+            "description": "Loads the station map and returns the shortest path between the stops as a list of station names. \
+             Only call this function when the user needs the route between two stations",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -40,7 +41,9 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "get_live_positions",
-            "description": "Given a line, return a list of dictionaries for every active train on that line",
+            "description": "Given a line, return a list of dictionaries for every active train on that line. \
+            Only call this function if the user asks about the whereabouts of the train for a given line. \
+            The Staten Island Railway is referenced as SI.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -54,7 +57,9 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "get_service_alerts",
-            "description": "Given a line, return a list of dictionaries for every service alert on that line",
+            "description": "Given a line, return a list of dictionaries for every service alert on that line. \
+            Only call this function if the user asks about delays or service alerts for a given line. \
+            The Staten Island Railway is referenced as SI.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -146,6 +151,7 @@ def agent_loop(query: str):
                 content = str(e)
                 logger.error("tool_output_err", function=tool.function.name, err=content)
 
+            tool_func_info["tool_response"] = content
             tool_calls.append(tool_func_info)
             messages.append({"role": "tool", "content": content, "tool_call_id": tool.id})
 

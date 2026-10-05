@@ -95,8 +95,8 @@ def run_test_questions(limit: int) -> None:
             json.dump(outputs, f, indent=2)
 
     for category, count in passes_category.items():
-        logger.info("eval_pass_category", category=category, passes=count["passes"], total=count["total"])
+        logger.warning("eval_pass_category", category=category, passes=count["passes"], total=count["total"])
 
 if __name__ == "__main__":
-    question_limit = 10
+    question_limit = 50
     run_test_questions(question_limit)
