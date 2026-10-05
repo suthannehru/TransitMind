@@ -31,7 +31,7 @@ def get_live_postitions(line: str) -> list[dict]:
 
     api_suffix = get_api_suffix(line)
     if not api_suffix:
-        return None
+        return []
     # Retrieve raw bytes from endpoint
     response = httpx.get(f"https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/{api_suffix}")
     # Raw data
@@ -59,7 +59,7 @@ def get_service_alerts(line: str) -> list[dict]:
 
     api_suffix = get_api_suffix(line)
     if not api_suffix:
-        return None
+        return []
     # Retrieve raw bytes from endpoint
     response = httpx.get(f"https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/{api_suffix}")
 
