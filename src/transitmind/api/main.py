@@ -4,7 +4,7 @@ import logging
 from openai import OpenAI
 from pydantic import BaseModel
 import structlog
-from transitmind.config import Settings
+from transitmind.config import settings
 from transitmind.graph.routing import find_route
 from transitmind.live.feed import get_live_postitions, get_service_alerts
 from transitmind.logging_config import configure_logging
@@ -79,10 +79,6 @@ llm_tools = [
         }
     },
 ]   
-
-
-# Instantiate settings
-settings = Settings()
 
 # Set Logging
 configure_logging(log_level=settings.log_level)

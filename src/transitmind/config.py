@@ -19,3 +19,6 @@ class Settings(BaseSettings):
     agent_max_iterations: int
 
     model_config = SettingsConfigDict(env_file=".env")
+
+# Instantiate settings
+settings = Settings()

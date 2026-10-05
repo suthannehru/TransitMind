@@ -1,5 +1,6 @@
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
+from transitmind.api.main import settings
 
 # Sentence Transformer
 # L6 means 6 transformer layers
@@ -18,7 +19,7 @@ def parse_route_query(query: str) -> tuple[str, str]:
     end_vector = model.encode(query[split_index + len(' to '):].strip(" ?.,!"))
 
     # Connect to the Qdrant Vector Database
-    client = QdrantClient(host="localhost", port="6333")
+    client = QdrantClient(url=settings.qdrant_url)
 
     start_result = client.query_points(collection_name="stations", query=start_vector, limit=3)
     end_result = client.query_points(collection_name="stations", query=end_vector, limit=3)

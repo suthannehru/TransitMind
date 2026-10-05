@@ -2,6 +2,7 @@ import pandas as pd
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 from sentence_transformers import SentenceTransformer
+from transitmind.api.main import settings
 
 # Sentence Transformer
 # L6 means 6 transformer layers
@@ -56,7 +57,7 @@ def load_vector_db() -> None:
     embeddings = model.encode(station_description)
 
     # Connect to the Qdrant Vector Database
-    client = QdrantClient(host="localhost", port="6333")
+    client = QdrantClient(url=settings.qdrant_url)
 
     # Create a collection in the vector database called "stations" where each value has a fixed-amount parameters/dimensions
     # Distance between input is computed using the Distance.COSINE function
