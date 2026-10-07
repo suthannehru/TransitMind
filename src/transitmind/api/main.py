@@ -41,7 +41,7 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "get_live_positions",
-            "description": """Given a line, return a list of dictionaries for every active train on that line.
+            "description": """Given a line, return a list of strings regarding the active trains for a line.
             Only call this function if the user asks about the whereabouts of the train for a given line.
             The Staten Island Railway is referenced as SI.""",
             "parameters": {
