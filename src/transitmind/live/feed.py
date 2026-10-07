@@ -1,6 +1,7 @@
 from google.transit import gtfs_realtime_pb2
 import httpx
 import structlog
+from transitmind.graph.routing import G
 
 logger = structlog.getLogger(__name__)
 
@@ -47,9 +48,16 @@ def get_live_postitions(line: str) -> list[dict]:
             vehicle = entity.vehicle
             trip = vehicle.trip
             if trip.route_id == line:
+                direction = vehicle.stop_id[-1]
+                parent_station = vehicle.stop_id.removesuffix(direction)
+                try:
+                    station = G.nodes[parent_station]["name"]
+                except KeyError:
+                    station = parent_station
                 positions.append({"trip_id": trip.trip_id, 
                                 "status": gtfs_realtime_pb2.VehiclePosition.VehicleStopStatus.Name(vehicle.current_status),
-                                "stop_id": vehicle.stop_id})
+                                "station": station,
+                                "direction": direction})
 
 
     return positions

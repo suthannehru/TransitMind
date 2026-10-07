@@ -98,7 +98,7 @@ def agent_loop(query: str):
     tool_calls = [] # Store tool_calls for evals
 
     messages = [
-        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all relevant content provided by the tools in the exact same order."},
+        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all content provided by the tools in the exact same order."},
         {"role": "user", "content": query}
     ]
 
