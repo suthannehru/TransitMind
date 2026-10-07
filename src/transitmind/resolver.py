@@ -1,6 +1,6 @@
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
-from transitmind.api.main import settings
+from transitmind.config import settings
 
 # Sentence Transformer
 # L6 means 6 transformer layers
