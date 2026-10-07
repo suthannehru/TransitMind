@@ -17,11 +17,10 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     # Use the LLM to score the answer
 
     system_prompt = """You are a strict fact-checker that determines if the answer's factual claims are supported by the tool_responses.
-        If not, determine which claims aren't backed by tool_responses 
-        Respond only with a JSON object. The JSON has two keys which are 'faithful' and 'unsupported_claims' 
-        faithful is mapped to a boolean. True if its faithful. unsupported_claims is a list of strings. 
-        Each string is a reference to a unsupported claim. If the answer is faithful, the list is empty.
-        Please don't add the usual fence of ```json in the beginning of the response and the ``` towards the end."""
+        If not, determine which claims aren't backed by tool_responses. Please don't add the usual fence of ```json in the beginning of the response and the ``` towards the end.
+        The entire response must be a JSON object. Don't add any sort of reasonings before or after the JSON object. The keys are 'faithful' and 'unsupported_claims'. The value of 'faithful' is a boolean where True indicates faithful.
+        The value of 'unsupported_claims' is a list of strings. Each string is a reason to explain the deviation between the answer and the tools response. The list is empty if faithful.
+        """
 
     user_message = f"Question: {question}\n\nTools and responses: {json.dumps(tool_responses)}\n\nAnswer: {answer}"
     messages = [{"role": "user", "content": user_message}]
@@ -40,6 +39,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     try:
         data = json.loads(response_text)
     except json.JSONDecodeError:
+        logger.error("evals_response_error", output=response_text)
         return (False, ["Unparseable judge output"])
 
     return (data.get("faithful", False), data.get("unsupported_claims", []))
@@ -137,7 +137,7 @@ def run_test_questions(limit: int) -> None:
         })
         outputs.append(output)
 
-        with open("data/evals_output.json", "w") as f:
+        with open("results/evals_output.json", "w") as f:
             json.dump(outputs, f, indent=2)
 
     for category, count in passes_category.items():
