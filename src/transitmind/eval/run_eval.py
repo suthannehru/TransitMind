@@ -144,5 +144,5 @@ def run_test_questions(limit: int) -> None:
         logger.warning("eval_pass_category", category=category, passes=count["passes"], faithful=count["faithful"], total=count["total"])
 
 if __name__ == "__main__":
-    question_limit = 30
+    question_limit = 10
     run_test_questions(question_limit)

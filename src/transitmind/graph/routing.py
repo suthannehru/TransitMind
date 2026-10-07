@@ -21,7 +21,25 @@ def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
     else:
         raise ValueError("Start and/or End Stop ID is invalid")        
 
-    return [G.nodes[stop_id]["name"] for stop_id in route]
+    result = []
+    prev_stop_id = None
+
+    for stop_id in route:
+        station = G.nodes[stop_id]["name"]
+        if prev_stop_id and G.edges[prev_stop_id, stop_id].get("transfer"):
+            prev_station = G.nodes[prev_stop_id]["name"]
+            if prev_station == station:
+                result.pop()
+            if len(result) > 0:
+                result.append(f"{station} (transfer)")
+            else:
+                result.append(station)
+        else:
+            result.append(station)
+
+        prev_stop_id = stop_id
+
+    return result
 
     
 

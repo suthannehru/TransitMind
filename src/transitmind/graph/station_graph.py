@@ -42,7 +42,7 @@ def build_station_graph() -> nx.Graph:
 
     # Adding edges between stations with transfers
     for transfer in transfers.itertuples():
-        metro.add_edge(transfer.from_stop_id, transfer.to_stop_id)
+        metro.add_edge(transfer.from_stop_id, transfer.to_stop_id, transfer=True)
 
     return metro
 
