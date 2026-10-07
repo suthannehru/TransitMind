@@ -55,15 +55,17 @@ def run_test_questions(limit: int) -> None:
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
 
-        if "no_tools" in tq["category"]:
-            continue
-
         response = agent_loop(tq["question"])
 
         #LLM-Judge
-        faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tools"], response["content"])
-        passes_category[tq["category"]]["faithful"] += 1 if faithful else 0
-        logger.warning("llm-judge-faithful-check", faithful=faithful, unsupported_claims=unsupported_claims)
+        if response["tools"]:
+            faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tools"], response["content"])
+            if not faithful:
+                logger.warning("llm-judge-faithful-check", response=response, faithful=faithful, unsupported_claims=unsupported_claims)
+            passes_category[tq["category"]]["judged"] += 1
+            passes_category[tq["category"]]["faithful"] += 1 if faithful else 0
+        else:
+            faithful, unsupported_claims = None, []
 
         output = tq.copy()
 
@@ -144,7 +146,7 @@ def run_test_questions(limit: int) -> None:
             json.dump(outputs, f, indent=2)
 
     for category, count in passes_category.items():
-        logger.warning("eval_pass_category", category=category, passes=count["passes"], faithful=count["faithful"], total=count["total"])
+        logger.warning("eval_pass_category", category=category, passes=count["passes"], faithful=count["faithful"], judged=count["judged"], total=count["total"])
 
 if __name__ == "__main__":
     question_limit = 10
