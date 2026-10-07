@@ -18,7 +18,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
 
     system_prompt = """You are a strict fact-checker that determines if the answer's factual claims are supported by the tool_responses.
         If not, determine which claims aren't backed by tool_responses. Please don't add the usual fence of ```json in the beginning of the response and the ``` towards the end.
-        The entire response must be a JSON object. Don't add any sort of reasonings before or after the JSON object. The keys are 'faithful' and 'unsupported_claims'. The value of 'faithful' is a boolean where True indicates faithful.
+        The entire response must be a JSON object. Don't add any sort of reasonings before or after the JSON object. The keys are 'faithful' and 'unsupported_claims'. The value of 'faithful' is a boolean where true indicates faithful.
         The value of 'unsupported_claims' is a list of strings. Each string is a reason to explain the deviation between the answer and the tools response. The list is empty if faithful.
         """
 
@@ -27,7 +27,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
 
     response = client.messages.create(model="claude-sonnet-5-5",
                            system=system_prompt,
-                           max_tokens=1000,
+                           max_tokens=2500,
                            messages=messages
                            )
     # Use generator to pull the next text block. Returns None if iteration is done
@@ -54,6 +54,9 @@ def run_test_questions(limit: int) -> None:
 
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
+
+        if "no_tools" in tq["category"]:
+            continue
 
         response = agent_loop(tq["question"])
 
