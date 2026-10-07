@@ -28,12 +28,12 @@ def get_api_suffix(line: str) -> str:
 # Object follows the data schema
 feed = gtfs_realtime_pb2.FeedMessage()
 
-def get_live_positions(line: str) -> dict[str, dict[str, dict[str, int]]]:
-    """Given a line, returns a dictionary of the following format. {station: {direction: {status: count}}}. The status in_transit_to means heading to that particular station"""
+def get_live_positions(line: str) -> list[str]:
+    """Given a line, returns a list of strings indicating positions."""
 
     api_suffix = get_api_suffix(line)
     if not api_suffix:
-        return {}
+        return []
     # Retrieve raw bytes from endpoint
     response = httpx.get(f"https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/{api_suffix}")
     # Raw data
@@ -43,6 +43,11 @@ def get_live_positions(line: str) -> dict[str, dict[str, dict[str, int]]]:
     feed.ParseFromString(rawbytes)
 
     positions = defaultdict(lambda: defaultdict(dict))
+    result = []
+    total_trains = 0
+    plurality = {True: {"train": "train", "is": "is"}, False: {"train": "trains", "is": "are"}}
+
+    status_text = {"stopped_at": "stopped at", "incoming_at": "arriving at", "in_transit_to": "in transit to"}
 
     for entity in feed.entity:
         if entity.HasField("vehicle"):
@@ -58,8 +63,19 @@ def get_live_positions(line: str) -> dict[str, dict[str, dict[str, int]]]:
                 status = (gtfs_realtime_pb2.VehiclePosition.VehicleStopStatus.Name(vehicle.current_status)).lower()
                 station_dir = positions[station][direction]
                 station_dir[status] = station_dir.get(status, 0) + 1
+                total_trains += 1
 
-    return positions
+    total_train_index = total_trains == 1
+    result.append(f"There are {total_trains} {plurality[total_train_index]['train']} for line {line}.")
+
+    for station, direction_dict in positions.items():
+        for direction, status_dict in direction_dict.items():
+            for status, count in status_dict.items():
+                formal_direction = "northbound" if direction == "N" else "southbound"
+                train_index = count == 1
+                result.append(f"{count} {plurality[train_index]['train']} {plurality[train_index]['is']} {status_text[status]} {station} in the {formal_direction} direction.")
+
+    return result
 
 def get_service_alerts(line: str) -> list[dict]:
     """Given a line, return a list of dictionaries for every service alert on that line"""
