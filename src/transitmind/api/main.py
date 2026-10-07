@@ -25,8 +25,8 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "find_route",
-            "description": "Loads the station map and returns the shortest path between the stops as a list of station names. \
-             Only call this function when the user needs the route between two stations",
+            "description": """Loads the station map and returns the shortest path between the stops as a list of station names.
+             Only call this function when the user needs the route between two stations""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -41,9 +41,9 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "get_live_positions",
-            "description": "Given a line, return a list of dictionaries for every active train on that line. \
-            Only call this function if the user asks about the whereabouts of the train for a given line. \
-            The Staten Island Railway is referenced as SI.",
+            "description": """Given a line, return a list of dictionaries for every active train on that line.
+            Only call this function if the user asks about the whereabouts of the train for a given line.
+            The Staten Island Railway is referenced as SI.""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -57,9 +57,9 @@ llm_tools = [
         "type": "function",
         "function": {
             "name": "get_service_alerts",
-            "description": "Given a line, return a list of dictionaries for every service alert on that line. \
-            Only call this function if the user asks about delays or service alerts for a given line. \
-            The Staten Island Railway is referenced as SI.",
+            "description": """Given a line, return a list of dictionaries for every service alert on that line.
+            Only call this function if the user asks about delays or service alerts for a given line.
+            The Staten Island Railway is referenced as SI.""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -98,7 +98,7 @@ def agent_loop(query: str):
     tool_calls = [] # Store tool_calls for evals
 
     messages = [
-        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway."},
+        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all relevant content provided by the tools in the exact same order."},
         {"role": "user", "content": query}
     ]
 

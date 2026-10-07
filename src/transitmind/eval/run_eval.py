@@ -1,12 +1,49 @@
+from anthropic import Anthropic
 from collections import defaultdict
 import json
 import random
 import structlog
 from transitmind.api.main import agent_loop
+from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
 
 logger = structlog.get_logger(__name__)
 
+# Create the client for the LLM-Judge
+client = Anthropic(api_key=settings.anthropic_api_key)
+
+def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -> tuple[bool, list[str]]:
+    
+    # Use the LLM to score the answer
+
+    system_prompt = """You are a strict fact-checker that determines if the answer's factual claims are supported by the tool_responses.
+        If not, determine which claims aren't backed by tool_responses 
+        Respond only with a JSON object. The JSON has two keys which are 'faithful' and 'unsupported_claims' 
+        faithful is mapped to a boolean. True if its faithful. unsupported_claims is a list of strings. 
+        Each string is a reference to a unsupported claim. If the answer is faithful, the list is empty.
+        Please don't add the usual fence of ```json in the beginning of the response and the ``` towards the end."""
+
+    user_message = f"Question: {question}\n\nTools and responses: {json.dumps(tool_responses)}\n\nAnswer: {answer}"
+    messages = [{"role": "user", "content": user_message}]
+
+    response = client.messages.create(model="claude-sonnet-5-5",
+                           system=system_prompt,
+                           max_tokens=1000,
+                           messages=messages
+                           )
+    # Use generator to pull the next text block. Returns None if iteration is done
+    response_text = next((res.text for res in response.content if res.type == "text"), None)
+
+    if not response_text:
+        return (False, ["No response from LLM-Judge"])
+
+    try:
+        data = json.loads(response_text)
+    except json.JSONDecodeError:
+        return (False, ["Unparseable judge output"])
+
+    return (data.get("faithful", False), data.get("unsupported_claims", []))
+    
 
 def run_test_questions(limit: int) -> None:
     outputs = []
@@ -17,7 +54,14 @@ def run_test_questions(limit: int) -> None:
 
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
+
         response = agent_loop(tq["question"])
+
+        #LLM-Judge
+        faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tools"], response["content"])
+        passes_category[tq["category"]]["faithful"] += 1 if faithful else 0
+        logger.warning("llm-judge-faithful-check", faithful=faithful, unsupported_claims=unsupported_claims)
+
         output = tq.copy()
 
         expected_tools_len = 0
@@ -87,6 +131,8 @@ def run_test_questions(limit: int) -> None:
             "hit_limit": response["hit_limit"],
             "called": response["tools"],
             "answer": response["content"],
+            "faithful": faithful,
+            "unsupported_claims": unsupported_claims,
             "passed": passed
         })
         outputs.append(output)
@@ -95,8 +141,8 @@ def run_test_questions(limit: int) -> None:
             json.dump(outputs, f, indent=2)
 
     for category, count in passes_category.items():
-        logger.warning("eval_pass_category", category=category, passes=count["passes"], total=count["total"])
+        logger.warning("eval_pass_category", category=category, passes=count["passes"], faithful=count["faithful"], total=count["total"])
 
 if __name__ == "__main__":
-    question_limit = 50
+    question_limit = 3
     run_test_questions(question_limit)
