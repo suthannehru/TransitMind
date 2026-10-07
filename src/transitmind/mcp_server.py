@@ -1,6 +1,6 @@
 from mcp.server.mcpserver import MCPServer
 from transitmind.graph.routing import find_route
-from transitmind.live.feed import get_live_postitions, get_service_alerts
+from transitmind.live.feed import get_live_positions, get_service_alerts
 from transitmind.resolver import parse_route_query
 
 def initialize_mcp_server() -> None:
@@ -11,7 +11,7 @@ def initialize_mcp_server() -> None:
     # Add the tools to the registry
     # Docustring added for each tool. LLM knows the description of each tool
     server.add_tool(find_route)
-    server.add_tool(get_live_postitions)
+    server.add_tool(get_live_positions)
     server.add_tool(get_service_alerts)
     server.add_tool(parse_route_query)
 

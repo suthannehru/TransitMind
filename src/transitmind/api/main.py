@@ -6,7 +6,7 @@ from pydantic import BaseModel
 import structlog
 from transitmind.config import settings
 from transitmind.graph.routing import find_route
-from transitmind.live.feed import get_live_postitions, get_service_alerts
+from transitmind.live.feed import get_live_positions, get_service_alerts
 from transitmind.logging_config import configure_logging
 from transitmind.resolver import parse_route_query
 
@@ -15,7 +15,7 @@ NUM_RESPONSES = 0
 
 tools_str_func = {
     "find_route": find_route,
-    "get_live_positions": get_live_postitions,
+    "get_live_positions": get_live_positions,
     "get_service_alerts": get_service_alerts,
     "parse_route_query": parse_route_query
 }

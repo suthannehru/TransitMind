@@ -1,3 +1,4 @@
+from collections import defaultdict
 from google.transit import gtfs_realtime_pb2
 import httpx
 import structlog
@@ -27,12 +28,12 @@ def get_api_suffix(line: str) -> str:
 # Object follows the data schema
 feed = gtfs_realtime_pb2.FeedMessage()
 
-def get_live_postitions(line: str) -> list[dict]:
-    """Given a line, return a list of dictionaries for every active train on that line"""
+def get_live_positions(line: str) -> dict[str, dict[str, dict[str, int]]]:
+    """Given a line, returns a dictionary of the following format. {station: {direction: {status: count}}}. The status in_transit_to means heading to that particular station"""
 
     api_suffix = get_api_suffix(line)
     if not api_suffix:
-        return []
+        return {}
     # Retrieve raw bytes from endpoint
     response = httpx.get(f"https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/{api_suffix}")
     # Raw data
@@ -41,7 +42,7 @@ def get_live_postitions(line: str) -> list[dict]:
     # Mutate the feed object with the header and entity data
     feed.ParseFromString(rawbytes)
 
-    positions = []
+    positions = defaultdict(lambda: defaultdict(dict))
 
     for entity in feed.entity:
         if entity.HasField("vehicle"):
@@ -54,11 +55,9 @@ def get_live_postitions(line: str) -> list[dict]:
                     station = G.nodes[parent_station]["name"]
                 except KeyError:
                     station = parent_station
-                positions.append({"trip_id": trip.trip_id, 
-                                "status": gtfs_realtime_pb2.VehiclePosition.VehicleStopStatus.Name(vehicle.current_status),
-                                "station": station,
-                                "direction": direction})
-
+                status = (gtfs_realtime_pb2.VehiclePosition.VehicleStopStatus.Name(vehicle.current_status)).lower()
+                station_dir = positions[station][direction]
+                station_dir[status] = station_dir.get(status, 0) + 1
 
     return positions
 
@@ -100,5 +99,5 @@ def get_service_alerts(line: str) -> list[dict]:
 if __name__ == "__main__":
     glp_params = ('1',)
     gsa_params = ('F',)
-    logger.info("get_live_postitions", params=glp_params, output=get_live_postitions(*glp_params))
+    logger.info("get_live_positions", params=glp_params, output=get_live_positions(*glp_params))
     logger.info("get_service_alerts", params=gsa_params, output=get_service_alerts(*gsa_params))
