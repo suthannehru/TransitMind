@@ -43,7 +43,6 @@ def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
                 continue
             if len(result):
                 result.append(f"Transfer at {start_station}.")
-            logger.warning("transfer", start_station=G.nodes[a]["name"], end_station=G.nodes[b]["name"], lines=legs)
             result.append(leg_sentence(start_station, end_station, legs, prev_edge))
             legs = set()
             start_station = None
@@ -58,11 +57,12 @@ def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
             else:
                 current_direction = G.edges[a, b].get("direction")
                 if current_direction != direction:
-                    logger.warning("direction_check", current_direction=current_direction, direction=direction)
                     result.append(leg_sentence(start_station, end_station, legs, prev_edge))
                     direction = current_direction
                     start_station = G.nodes[a]["name"]
                     legs = lines
+                    end_station = G.nodes[b]["name"]
+                    prev_edge = G.edges[a, b]
                     continue
                 intersect_lines = lines.intersection(legs)
                 if len(intersect_lines):
@@ -73,7 +73,6 @@ def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
                     start_station = G.nodes[a]["name"]
             end_station = G.nodes[b]["name"]
             prev_edge = G.edges[a, b]
-            logger.warning("check_route", start_station=start_station, end_station=end_station, lines=legs)
 
     if start_station is not None:
         result.append(leg_sentence(start_station, end_station, legs, prev_edge))
