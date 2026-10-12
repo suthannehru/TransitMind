@@ -6,8 +6,33 @@ import structlog
 from transitmind.api.main import agent_loop
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
+from transitmind.graph.routing import G
+import networkx as nx
 
 logger = structlog.get_logger(__name__)
+
+def build_station_keys() -> dict[str, str]:
+    """Maps each stop ID to one canonical ID shared by the stops in the same complex with the exact same name"""
+
+    transfers = nx.Graph([(u, v) for u, v, d in G.edges(data=True) if d.get("transfer")])
+    keys = {}
+
+    for complex_stops in nx.connected_components(transfers):
+        stops_by_name = defaultdict(list)
+        for stop in complex_stops:
+            stops_by_name[G.nodes[stop].get("name")].append(stop)
+        for stops in stops_by_name.values():
+            for stop in stops:
+                keys[stop] = min(stops)
+
+    return keys
+
+station_keys = build_station_keys()
+
+def canonical_args(args: dict) -> frozenset:
+    """Treats stop IDs of the same station as equal, so the expected and called args are compared by station"""
+
+    return frozenset((k, station_keys.get(v, v) if k.endswith("stop_id") else v) for k, v in args.items())
 
 # Create the client for the LLM-Judge
 client = Anthropic(api_key=settings.anthropic_api_key)
@@ -85,12 +110,12 @@ def run_test_questions(limit: int) -> None:
                 raise KeyError("Expected args for a function that is not in the expected tool calls")
 
             if len(args):
-                excepted_tool_calls[f].add(frozenset(args.items()))
+                excepted_tool_calls[f].add(canonical_args(args))
 
         # Assumption is that a function is not called twice with the same params
         for t in response["tools"]:
             agent_tool_calls_len += 1
-            agent_tool_calls[t["function"]].add(frozenset(t["args"].items()))
+            agent_tool_calls[t["function"]].add(canonical_args(t["args"]))
 
 
         for v in excepted_tool_calls.values():
@@ -149,5 +174,5 @@ def run_test_questions(limit: int) -> None:
         logger.warning("eval_pass_category", category=category, passes=count["passes"], faithful=count["faithful"], judged=count["judged"], total=count["total"])
 
 if __name__ == "__main__":
-    question_limit = 10
+    question_limit = 70
     run_test_questions(question_limit)
