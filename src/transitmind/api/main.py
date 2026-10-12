@@ -98,7 +98,7 @@ def agent_loop(query: str):
     tool_calls = [] # Store tool_calls for evals
 
     messages = [
-        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all content provided by the tools in the exact same order."},
+        {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all content provided by the tools in the exact same order. Use only information the tools returned: do not add transfers, lines, stations, directions, walking steps or advice that are not in the tool responses. If a tool returns an error or says no route exists, say so."},
         {"role": "user", "content": query}
     ]
 
