@@ -20,5 +20,6 @@ dependencies = [
    "pytest",
    "ragas",
    "pandas",
-   "networkx"
+   "networkx",
+   "langgraph"
 ]
