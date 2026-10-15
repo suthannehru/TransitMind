@@ -26,11 +26,11 @@ client = OpenAI(api_key=settings.openai_api_key)
 class AskRequest(BaseModel):
     question: str
 
-def initial_params(query: AskRequest) -> dict[str, Any]:
+def initial_params(query: str) -> dict[str, Any]:
     return {
         "messages": [
             {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all content provided by the tools in the exact same order. Use only information the tools returned: do not add transfers, lines, stations, directions, walking steps or advice that are not in the tool responses. If a tool returns an error or says no route exists, say so."},
-            {"role": "user", "content": query.question}
+            {"role": "user", "content": query}
         ],
         "iteration": 0,
         "tool_calls": [],
@@ -139,13 +139,11 @@ app = FastAPI()
 @app.post("/ask")
 def ask(request: AskRequest):
     try:
-        final_state = graph.invoke(initial_params(request))
+        final_state = graph.invoke(initial_params(request.question))
         answer = final_state["messages"][-1]["content"]
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     return {"answer": answer}
 
-if __name__ == "__main__":
-    print(graph.invoke(initial_params(AskRequest(question="How do you go from 169 St to Prospect Park ?"))))
 
