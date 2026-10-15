@@ -96,7 +96,7 @@ def agent_loop(query: str):
         res["hit_limit"] = False
         logger.info("final_tool_output", iteration=agent_iter, output=response_choice.message.content)
 
-    res["tools"] = tool_calls
+    res["tool_calls"] = tool_calls
 
     return res
 

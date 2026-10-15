@@ -4,6 +4,7 @@ import json
 import random
 import structlog
 from transitmind.api.main import agent_loop
+from transitmind.api.main_lg import graph, initial_params
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
 from transitmind.graph.routing import G
@@ -70,7 +71,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     return (data.get("faithful", False), data.get("unsupported_claims", []))
     
 
-def run_test_questions(limit: int) -> None:
+def run_test_questions(limit: int, use_graph: bool=True) -> None:
     outputs = []
     passes_category = defaultdict(lambda: defaultdict(int))
 
@@ -80,11 +81,16 @@ def run_test_questions(limit: int) -> None:
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
 
-        response = agent_loop(tq["question"])
+        if use_graph:
+            response = graph.invoke(initial_params(tq["question"]))
+            content = response["messages"][-1]["content"]
+        else:
+            response = agent_loop(tq["question"])
+            content = response["content"]
 
         #LLM-Judge
-        if response["tools"]:
-            faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tools"], response["content"])
+        if response["tool_calls"]:
+            faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tool_calls"], content)
             if not faithful:
                 logger.warning("llm-judge-faithful-check", response=response, faithful=faithful, unsupported_claims=unsupported_claims)
             passes_category[tq["category"]]["judged"] += 1
@@ -113,7 +119,7 @@ def run_test_questions(limit: int) -> None:
                 excepted_tool_calls[f].add(canonical_args(args))
 
         # Assumption is that a function is not called twice with the same params
-        for t in response["tools"]:
+        for t in response["tool_calls"]:
             agent_tool_calls_len += 1
             agent_tool_calls[t["function"]].add(canonical_args(t["args"]))
 
@@ -159,8 +165,8 @@ def run_test_questions(limit: int) -> None:
             "precision": precision,
             "recall": recall,
             "hit_limit": response["hit_limit"],
-            "called": response["tools"],
-            "answer": response["content"],
+            "called": response["tool_calls"],
+            "answer": content,
             "faithful": faithful,
             "unsupported_claims": unsupported_claims,
             "passed": passed
