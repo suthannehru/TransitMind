@@ -1,0 +1,8 @@
+.env
+.vscode/
+results/
+README.md
+data/gtfs_subway/
+__pycache__
+*.egg-info
+.git*
