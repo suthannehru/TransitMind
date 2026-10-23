@@ -18,6 +18,9 @@ COPY src ./src
 # Install modules
 RUN pip install --no-cache-dir .
 
+# Download the model
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
 # Generate graph.pkl
 RUN python3 -m transitmind.graph.station_graph
 
