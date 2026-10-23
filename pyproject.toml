@@ -17,9 +17,14 @@ dependencies = [
    "anthropic",
    "openai",
    "mcp",
-   "pytest",
-   "ragas",
    "pandas",
-   "networkx",
    "langgraph"
 ]
+[project.optional-dependencies]
+dev = [
+   "pytest",
+   "ragas"
+]
+[build-system]
+requires = ["setuptools>=78.1.1"]
+build-backend = "setuptools.build_meta"
