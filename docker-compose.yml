@@ -1,4 +1,14 @@
 services:
+  loader:
+    image: transitmind:latest
+    command: "python3 -m transitmind.static_kb.loader"
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+
   redis:
     image: redis:7-alpine
     ports:
@@ -12,6 +22,25 @@ services:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/6333"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  app:
+    image: transitmind:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      qdrant: 
+        condition: service_healthy
+      loader: 
+        condition: service_completed_successfully
+    env_file: .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
 
 volumes:
   data:
