@@ -3,39 +3,15 @@
 # You have edges which are the control flow
 import json
 from langgraph.graph import StateGraph, START, END
-from openai import OpenAI
+from langgraph.graph.state import CompiledStateGraph
 import operator
 import structlog
-from typing import Annotated, TypedDict, Any
+from typing import Annotated, TypedDict
+from transitmind.agent.client import client, NUM_RESPONSES
 from transitmind.config import settings
-from transitmind.logging_config import configure_logging
 from transitmind.tools import tools_str_func, llm_tools
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 
-# Number of responses from the LLM to look at
-NUM_RESPONSES = 0
-
-# Set Logging
-configure_logging(log_level=settings.log_level)
 logger = structlog.getLogger(__name__)
-
-# Create LLM Client
-client = OpenAI(api_key=settings.openai_api_key)
-
-class AskRequest(BaseModel):
-    question: str
-
-def initial_params(query: str) -> dict[str, Any]:
-    return {
-        "messages": [
-            {"role": "system", "content": "You are a personal assistant to help navigate the NYC MTA subway. Please provide all content provided by the tools in the exact same order. Use only information the tools returned: do not add transfers, lines, stations, directions, walking steps or advice that are not in the tool responses. If a tool returns an error or says no route exists, say so."},
-            {"role": "user", "content": query}
-        ],
-        "iteration": 0,
-        "tool_calls": [],
-        "hit_limit": False
-    }
 
 class AgentState(TypedDict):
     # Annotated is a way to attach the reducer without changing the type
@@ -114,36 +90,26 @@ def should_continue(state: AgentState):
         return "limit_reached"
     return END
 
-# Creater a builder
-builder = StateGraph(AgentState)
 
-# Add nodes
-# Label for node, function to call for node
-builder.add_node("call_llm", call_llm)
-builder.add_node("run_tools", run_tools)
-builder.add_node("limit_reached", limit_reached)
+def build_graph() -> CompiledStateGraph:
+    # Creater a builder
+    builder = StateGraph(AgentState)
 
-# Add edges
-# Start Node, End Node
-builder.add_edge(START, "call_llm")
-# Start Node, Router -> After Start Node finishes, call router to determine end node
-builder.add_conditional_edges("call_llm", should_continue)
-builder.add_edge("run_tools", "call_llm")
-builder.add_edge("limit_reached", END)
+    # Add nodes
+    # Label for node, function to call for node
+    builder.add_node("call_llm", call_llm)
+    builder.add_node("run_tools", run_tools)
+    builder.add_node("limit_reached", limit_reached)
 
-# Compile graph
-graph = builder.compile()
+    # Add edges
+    # Start Node, End Node
+    builder.add_edge(START, "call_llm")
+    # Start Node, Router -> After Start Node finishes, call router to determine end node
+    builder.add_conditional_edges("call_llm", should_continue)
+    builder.add_edge("run_tools", "call_llm")
+    builder.add_edge("limit_reached", END)
 
-app = FastAPI()
+    # Compile graph
+    graph = builder.compile()
 
-@app.post("/ask")
-def ask(request: AskRequest):
-    try:
-        final_state = graph.invoke(initial_params(request.question))
-        answer = final_state["messages"][-1]["content"]
-    except (ValueError, KeyError) as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    return {"answer": answer}
-
-
+    return graph

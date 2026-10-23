@@ -3,14 +3,17 @@ from collections import defaultdict
 import json
 import random
 import structlog
-from transitmind.api.main import agent_loop
-from transitmind.api.main_lg import graph, initial_params
+from transitmind.agent.graph import build_graph
+from transitmind.agent.loop import agent_loop
+from transitmind.agent.prompt import initial_params
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
 from transitmind.graph.routing import G
 import networkx as nx
 
 logger = structlog.get_logger(__name__)
+
+graph = build_graph()
 
 def build_station_keys() -> dict[str, str]:
     """Maps each stop ID to one canonical ID shared by the stops in the same complex with the exact same name"""
@@ -181,4 +184,4 @@ def run_test_questions(limit: int, use_graph: bool=True) -> None:
 
 if __name__ == "__main__":
     question_limit = 130
-    run_test_questions(question_limit)
+    run_test_questions(question_limit, use_graph=settings.use_graph)

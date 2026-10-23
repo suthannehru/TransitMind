@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     log_level: str
     agent_max_iterations: int
 
+    # Use LangGraph Implementation
+    use_graph: bool = True
+
     model_config = SettingsConfigDict(env_file=".env")
 
 # Instantiate settings
