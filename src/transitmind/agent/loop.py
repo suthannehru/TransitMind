@@ -1,9 +1,9 @@
 import json
 import structlog
-from transitmind.agent.client import client, NUM_RESPONSES
+from transitmind.agent.client import NUM_RESPONSES, client
 from transitmind.agent.prompt import build_messages
 from transitmind.config import settings
-from transitmind.tools import tools_str_func, llm_tools
+from transitmind.tools import llm_tools, tools_str_func
 
 logger = structlog.getLogger(__name__)
 

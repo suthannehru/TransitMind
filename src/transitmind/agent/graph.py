@@ -2,14 +2,14 @@
 # You have nodes that are like the functions
 # You have edges which are the control flow
 import json
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 import operator
 import structlog
-from typing import Annotated, TypedDict
-from transitmind.agent.client import client, NUM_RESPONSES
+from transitmind.agent.client import NUM_RESPONSES, client
 from transitmind.config import settings
-from transitmind.tools import tools_str_func, llm_tools
+from transitmind.tools import llm_tools, tools_str_func
+from typing import Annotated, TypedDict
 
 logger = structlog.getLogger(__name__)
 

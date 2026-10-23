@@ -1,6 +1,7 @@
 from anthropic import Anthropic
 from collections import defaultdict
 import json
+import networkx as nx
 import random
 import structlog
 from transitmind.agent.graph import build_graph
@@ -9,7 +10,6 @@ from transitmind.agent.prompt import initial_params
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
 from transitmind.graph.routing import G
-import networkx as nx
 
 logger = structlog.get_logger(__name__)
 

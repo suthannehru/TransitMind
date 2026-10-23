@@ -1,6 +1,6 @@
-import structlog
 import networkx as nx
 import pickle
+import structlog
 
 logger = structlog.getLogger(__name__)
 
