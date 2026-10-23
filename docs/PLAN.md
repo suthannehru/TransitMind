@@ -1,8 +1,8 @@
-# TrackWise — Build Plan
+# TransitMind — Build Plan
 
 ## Context
 
-You have `docs/PROJECT_SPEC.md` describing TrackWise, an agentic RAG assistant for the NYC subway, and no code yet. You've never built something like this before, but you want to implement every feature in the spec: agentic tool-calling, eval harness, MCP server, deployment-ready Docker, observability, safety.
+You have `docs/PROJECT_SPEC.md` describing TransitMind, an agentic RAG assistant for the NYC subway, and no code yet. You've never built something like this before, but you want to implement every feature in the spec: agentic tool-calling, eval harness, MCP server, deployment-ready Docker, observability, safety.
 
 The plan is **MVP-first**: get a working end-to-end answer in phase 1, then layer features. That way you always have something demoable, you learn the pieces incrementally, and each phase's "verification" step tells you the previous phase actually works.
 
@@ -25,7 +25,7 @@ TransitMind/
 ├── docs/ARCHITECTURE.md          # phase 10
 ├── docs/COST.md                  # phase 9
 ├── docs/FAILURE_MODES.md         # phase 8
-├── src/trackwise/
+├── src/transitmind/
 │   ├── config.py                 # pydantic-settings, all env vars
 │   ├── logging.py                # structlog → JSON stdout
 │   ├── api/main.py               # FastAPI app, POST /ask
@@ -54,11 +54,11 @@ TransitMind/
 - `pyproject.toml` with deps: `fastapi`, `uvicorn`, `pydantic-settings`, `structlog`, `httpx`, `redis`, `qdrant-client`, `sentence-transformers`, `gtfs-realtime-bindings`, `networkx`, `anthropic`, `openai`, `mcp`, `pytest`, `ragas`
 - `docker-compose.yml` with three services: `app`, `qdrant:latest`, `redis:7-alpine` (with named volumes)
 - `.env.example` listing every var: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `LLM_PROVIDER`, `LLM_MODEL`, `QDRANT_URL`, `REDIS_URL`, `MTA_FEED_BASE_URL`, `LOG_LEVEL`, `AGENT_MAX_ITERATIONS`
-- `src/trackwise/config.py` — one `Settings` class, all env vars
-- `src/trackwise/logging.py` — structlog configured for JSON output
+- `src/transitmind/config.py` — one `Settings` class, all env vars
+- `src/transitmind/logging.py` — structlog configured for JSON output
 - `README.md` skeleton
 
-**Verify:** `docker compose up` brings up Qdrant + Redis. `python -c "from trackwise.config import settings; print(settings)"` works.
+**Verify:** `docker compose up` brings up Qdrant + Redis. `python -c "from transitmind.config import settings; print(settings)"` works.
 
 ---
 
@@ -84,7 +84,7 @@ TransitMind/
 - Build `graph/station_graph.py`: parse `stop_times.txt` to derive station adjacency by route → `networkx.Graph`, pickle to `data/graph.pkl`
 - Persist Qdrant to a Docker volume so restarts don't re-embed
 
-**Verify:** `python -m trackwise.static_kb.loader` completes in reasonable time. Query "L train stations in Brooklyn" retrieves relevant stops. `nx.shortest_path(g, "Bedford Av", "Times Sq-42 St")` returns a plausible path.
+**Verify:** `python -m transitmind.static_kb.loader` completes in reasonable time. Query "L train stations in Brooklyn" retrieves relevant stops. `nx.shortest_path(g, "Bedford Av", "Times Sq-42 St")` returns a plausible path.
 
 ---
 
@@ -123,7 +123,7 @@ This is the heart of the project — where you replace the fixed pipeline with a
 - `llm/openai_provider.py` — uses OpenAI function calling
 - Provider chosen via `LLM_PROVIDER` env var
 - `agent/loop.py`:
-  1. System prompt: describes TrackWise, lists available tools
+  1. System prompt: describes TransitMind, lists available tools
   2. Loop up to `AGENT_MAX_ITERATIONS` (default 5): call LLM → if tool_use, dispatch via `tools/registry.py`, append result, continue → if text, return
   3. On tool exception: append error message as tool result (don't crash)
 - Replace phase-1 fixed pipeline in `POST /ask` with the agent loop
@@ -139,7 +139,7 @@ The spec calls this out as *the* signal of real LLM experience. Do it well.
 - `eval/questions.yaml` — 30–50 questions, each with: `question`, `expected_stations` (list), `expected_tools` (list, order-agnostic), `gold_answer` (reference text)
 - `eval/retrieval.py` — for each question, run the agent, log which stations were retrieved, which tools were called → precision/recall vs expected
 - `eval/faithfulness.py` — RAGAS `faithfulness` metric, or LLM-as-judge using Claude Haiku 4.5 (cheap) that scores agent answer against gold answer + retrieved context
-- `eval/runner.py` — CLI: `python -m trackwise.eval` → prints per-question results + summary table, saves `eval/results/{timestamp}.json`
+- `eval/runner.py` — CLI: `python -m transitmind.eval` → prints per-question results + summary table, saves `eval/results/{timestamp}.json`
 - Track numbers in README: "Retrieval precision: X%, faithfulness: Y%"
 
 **Verify:** Runner completes on the full question set, prints numbers, saves JSON. Deliberately break a tool → numbers drop → you can point to which questions regressed. That's the story you tell interviewers.
@@ -150,10 +150,10 @@ The spec calls this out as *the* signal of real LLM experience. Do it well.
 
 - `mcp_server/server.py` — use Anthropic's `mcp` Python SDK
 - Register the same tools from `tools/registry.py` — one code path, two surfaces (HTTP API + MCP)
-- Entry point: `python -m trackwise.mcp_server`
+- Entry point: `python -m transitmind.mcp_server`
 - README section: how to connect from Claude Desktop (config JSON snippet)
 
-**Verify:** Add TrackWise to Claude Desktop's MCP config, ask Claude "What subway lines run through Bedford Ave?" — it calls your `vector_search` tool.
+**Verify:** Add TransitMind to Claude Desktop's MCP config, ask Claude "What subway lines run through Bedford Ave?" — it calls your `vector_search` tool.
 
 ---
 
@@ -219,7 +219,7 @@ You should be able to walk an interviewer through:
 
 1. `docker compose up` → curl `/ask` with a realistic transit question → grounded, correct-ish answer
 2. Show the agent trace: LLM called `find_route` and `get_service_alerts`, fused both
-3. `python -m trackwise.eval` → numbers → "here's a question class where retrieval was weak, here's what I changed"
+3. `python -m transitmind.eval` → numbers → "here's a question class where retrieval was weak, here's what I changed"
 4. Open `docs/COST.md` → real $/query → optimization plan
 5. Point at `docs/FAILURE_MODES.md` → one specific failure you found and fixed
 6. Connect Claude Desktop to your MCP server, ask a question live
