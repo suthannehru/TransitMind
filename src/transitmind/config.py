@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     openai_api_key: str
     llm_provider: str
     llm_model: str
+    input_price_per_million: float
+    output_price_per_million: float
 
     # Services Config
     qdrant_url: str

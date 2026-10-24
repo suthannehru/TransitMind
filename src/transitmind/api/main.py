@@ -48,11 +48,18 @@ def ask(request: AskRequest):
     finally:
         request_latency = round((time.perf_counter() - start_request) * 1000)
         agent = "graph" if settings.use_graph else "loop"
+
+        # Compute cost
+        input_cost = round((prompt_tokens / 1e6) * settings.input_price_per_million, 6)
+        output_cost = round((completion_tokens / 1e6) * settings.output_price_per_million, 6)
+
         logger.info("api_metrics", 
                     agent=agent,
                     latency_ms=request_latency,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
-                    total_tokens=total_tokens)
+                    total_tokens=total_tokens,
+                    input_cost_usd=input_cost,
+                    output_cost_usd=output_cost)
     
     return {"answer": answer}
