@@ -25,6 +25,8 @@ dev = [
    "pytest",
    "ragas"
 ]
+[tool.setuptools.package-data]
+transitmind = ["api/static/*"]
 [build-system]
 requires = ["setuptools>=78.1.1"]
 build-backend = "setuptools.build_meta"

@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from pydantic import BaseModel
 import structlog
 import time
@@ -13,6 +15,8 @@ graph = build_graph()
 
 class AskRequest(BaseModel):
     question: str
+    # Earlier turns from the UI; not used by the agents yet
+    history: list[dict[str, str]] = []
 
 # uvicorn is the webserver listening on the given port for HTTP requests
 # It validates the content and sends that as a readable format to FastAPI
@@ -23,6 +27,7 @@ app = FastAPI()
 def ask(request: AskRequest):
     start_request = time.perf_counter()
     prompt_tokens = 0; completion_tokens = 0; total_tokens = 0;
+    tool_calls = []
     try:
         if settings.use_graph:
             final_state = graph.invoke(initial_params(request.question))
@@ -32,6 +37,7 @@ def ask(request: AskRequest):
             prompt_tokens = final_state["prompt_tokens"]
             completion_tokens = final_state["completion_tokens"]
             total_tokens = final_state["total_tokens"]
+            tool_calls = final_state["tool_calls"]
 
         else:
             response = agent_loop(request.question)
@@ -42,6 +48,7 @@ def ask(request: AskRequest):
             prompt_tokens = tokens["prompt_tokens"]
             completion_tokens = tokens["completion_tokens"]
             total_tokens = tokens["total_tokens"]
+            tool_calls = response["tool_calls"]
 
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -62,4 +69,13 @@ def ask(request: AskRequest):
                     input_cost_usd=input_cost,
                     output_cost_usd=output_cost)
     
-    return {"answer": answer}
+    return {"answer": answer,
+            "agent": agent,
+            "latency_ms": request_latency,
+            "total_tokens": total_tokens,
+            "cost_usd": input_cost + output_cost,
+            "tool_calls": tool_calls}
+
+
+# Mounted last so it doesn't shadow the API routes
+app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

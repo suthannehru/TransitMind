@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TransitMind</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #14181f; --muted: #667085;
+    --border: #e4e7ec; --accent: #0039a6; --accent-text: #fff; --chip: #eef2fb;
+    --err: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --card: #171b22; --text: #e8ebf0; --muted: #98a2b3;
+      --border: #2a303a; --accent: #5b8def; --accent-text: #0e1116; --chip: #1f2735;
+      --err: #f97066;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: 4px 0 20px; color: var(--muted); }
+  form { display: flex; gap: 8px; }
+  input[type=text] {
+    flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: inherit;
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 10px; padding: 12px 18px;
+    border: 0; background: var(--accent); color: var(--accent-text); font-weight: 600;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 24px; }
+  .chip {
+    background: var(--chip); color: var(--text); border: 1px solid var(--border);
+    padding: 6px 12px; font-weight: 400; font-size: .875rem; border-radius: 999px;
+  }
+  #thread { display: flex; flex-direction: column; gap: 14px; }
+  .msg { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .msg.user { background: var(--chip); }
+  .msg.error { border-color: var(--err); color: var(--err); }
+  .msg .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .meta { margin-top: 10px; font-size: .8125rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  details { margin-top: 8px; font-size: .8125rem; color: var(--muted); }
+  details pre { margin: 6px 0 0; padding: 10px; background: var(--bg); border-radius: 8px; overflow-x: auto; }
+  .options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pending { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>TransitMind</h1>
+    <p>Ask about NYC subway routes, live trains and service alerts.</p>
+  </header>
+
+  <form id="form">
+    <input id="q" type="text" placeholder="How do I get from Jamaica Center to World Trade Center?" autocomplete="off" aria-label="Question" required>
+    <button id="send" type="submit">Ask</button>
+  </form>
+
+  <div class="examples" id="examples"></div>
+  <section id="thread" aria-live="polite"></section>
+</main>
+
+<script>
+const EXAMPLES = [
+  "How do I get from Kew Gardens to Sheepshead Bay?",
+  "Are there delays on the L?",
+  "Where are the A trains right now?",
+  "How do I go from 169 St to Delancey-Essex?"
+];
+
+const form = document.getElementById("form");
+const input = document.getElementById("q");
+const send = document.getElementById("send");
+const thread = document.getElementById("thread");
+
+// Prior turns, sent with each request so the agent can follow up on a clarifying question.
+const history = [];
+
+for (const text of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = text;
+  b.onclick = () => { input.value = text; form.requestSubmit(); };
+  document.getElementById("examples").append(b);
+}
+
+function addMessage(kind, text) {
+  const el = document.createElement("div");
+  el.className = "msg " + kind;
+  const body = document.createElement("div");
+  body.className = "body";
+  body.textContent = text;
+  el.append(body);
+  thread.append(el);
+  el.scrollIntoView({ block: "end", behavior: "smooth" });
+  return el;
+}
+
+function addMeta(el, data) {
+  const parts = [];
+  if (data.latency_ms != null) parts.push(`${(data.latency_ms / 1000).toFixed(1)}s`);
+  if (data.total_tokens != null) parts.push(`${data.total_tokens} tokens`);
+  if (data.cost_usd != null) parts.push(`$${data.cost_usd.toFixed(5)}`);
+  if (data.agent) parts.push(`agent: ${data.agent}`);
+  if (parts.length) {
+    const m = document.createElement("div");
+    m.className = "meta";
+    parts.forEach(p => { const s = document.createElement("span"); s.textContent = p; m.append(s); });
+    el.append(m);
+  }
+  if (data.tool_calls && data.tool_calls.length) {
+    const d = document.createElement("details");
+    const s = document.createElement("summary");
+    s.textContent = `Tools used: ${data.tool_calls.map(t => t.function).join(" → ")}`;
+    const pre = document.createElement("pre");
+    pre.textContent = JSON.stringify(data.tool_calls, null, 2);
+    d.append(s, pre);
+    el.append(d);
+  }
+  // Clarifying question: backend returns options, shown as one-click replies.
+  if (data.options && data.options.length) {
+    const box = document.createElement("div");
+    box.className = "options";
+    for (const opt of data.options) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip";
+      b.textContent = typeof opt === "string" ? opt : opt.label;
+      b.onclick = () => { input.value = b.textContent; form.requestSubmit(); };
+      box.append(b);
+    }
+    el.append(box);
+  }
+}
+
+async function ask(question) {
+  const res = await fetch("/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question, history })
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { detail = (await res.json()).detail || detail; } catch {}
+    throw new Error(detail);
+  }
+  return res.json();
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = "";
+  send.disabled = true;
+
+  addMessage("user", question);
+  const pending = addMessage("assistant pending", "Thinking…");
+
+  try {
+    const data = await ask(question);
+    pending.classList.remove("pending");
+    pending.querySelector(".body").textContent = data.answer;
+    addMeta(pending, data);
+    history.push({ role: "user", content: question }, { role: "assistant", content: data.answer });
+  } catch (err) {
+    pending.classList.remove("pending");
+    pending.classList.add("error");
+    pending.querySelector(".body").textContent = "Something went wrong: " + err.message;
+  } finally {
+    send.disabled = false;
+    input.focus();
+  }
+});
+</script>
+</body>
+</html>
