@@ -47,7 +47,9 @@ def ask(request: AskRequest):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         request_latency = round((time.perf_counter() - start_request) * 1000)
+        agent = "graph" if settings.use_graph else "loop"
         logger.info("api_metrics", 
+                    agent=agent,
                     latency_ms=request_latency,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
