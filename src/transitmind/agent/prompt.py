@@ -14,5 +14,8 @@ def initial_params(query: str) -> dict[str, Any]:
         "messages": build_messages(query),
         "iteration": 0,
         "tool_calls": [],
-        "hit_limit": False
+        "hit_limit": False,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0   
     }

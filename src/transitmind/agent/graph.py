@@ -21,6 +21,9 @@ class AgentState(TypedDict):
     iteration: int
     tool_calls: Annotated[list, operator.add]
     hit_limit: bool
+    prompt_tokens: Annotated[int, operator.add]
+    completion_tokens: Annotated[int, operator.add]
+    total_tokens: Annotated[int, operator.add]
 
 def call_llm(state: AgentState):
     llm_response = client.chat.completions.create(model=settings.llm_model, 
@@ -28,8 +31,12 @@ def call_llm(state: AgentState):
                                             tools=llm_tools)
     
     response_choice = llm_response.choices[NUM_RESPONSES]
+    tokens = llm_response.usage
 
-    return {"messages": [response_choice.message.model_dump()]}
+    return {"messages": [response_choice.message.model_dump()],
+            "prompt_tokens": tokens.prompt_tokens,
+            "completion_tokens": tokens.completion_tokens,
+            "total_tokens": tokens.total_tokens}
 
 def run_tools(state: AgentState ):
     tool_calls = state["messages"][-1]["tool_calls"]

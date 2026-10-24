@@ -17,10 +17,17 @@ def agent_loop(query: str):
     # Keep count of the agent iterations
     agent_iter = 0 
 
+    # Log tokens usage
+    res["tokens"] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
     while (agent_iter < settings.agent_max_iterations):
         llm_response = client.chat.completions.create(model=settings.llm_model, 
                                                 messages=messages,
                                                 tools=llm_tools)
+
+        res["tokens"]["prompt_tokens"] += llm_response.usage.prompt_tokens
+        res["tokens"]["completion_tokens"] += llm_response.usage.completion_tokens
+        res["tokens"]["total_tokens"] += llm_response.usage.total_tokens
 
         response_choice = llm_response.choices[NUM_RESPONSES]
 
