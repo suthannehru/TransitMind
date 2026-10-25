@@ -9,7 +9,7 @@ from transitmind.agent.loop import agent_loop
 from transitmind.agent.prompt import initial_params
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
-from transitmind.graph.routing import G
+from transitmind.graph.routing import G, find_stop_id
 
 logger = structlog.get_logger(__name__)
 
@@ -124,7 +124,12 @@ def run_test_questions(limit: int, use_graph: bool=True) -> None:
         # Assumption is that a function is not called twice with the same params
         for t in response["tool_calls"]:
             agent_tool_calls_len += 1
-            agent_tool_calls[t["function"]].add(canonical_args(t["args"]))
+            args = t["args"]
+            # find_route takes station names, so resolve them to stop IDs to compare against the expected IDs
+            if t["function"] == "find_route":
+                start_stop_id, end_stop_id = find_stop_id(args.get("start_stop", ""), args.get("end_stop", ""))
+                args = {"start_stop_id": start_stop_id, "end_stop_id": end_stop_id}
+            agent_tool_calls[t["function"]].add(canonical_args(args))
 
 
         for v in excepted_tool_calls.values():

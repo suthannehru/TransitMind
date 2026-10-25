@@ -1,7 +1,6 @@
 from mcp.server.mcpserver import MCPServer
 from transitmind.graph.routing import find_route
 from transitmind.live.feed import get_live_positions, get_service_alerts
-from transitmind.resolver import parse_route_query
 
 def initialize_mcp_server() -> None:
     # Create an MCP Server object 
@@ -13,7 +12,6 @@ def initialize_mcp_server() -> None:
     server.add_tool(find_route)
     server.add_tool(get_live_positions)
     server.add_tool(get_service_alerts)
-    server.add_tool(parse_route_query)
 
     return server
 

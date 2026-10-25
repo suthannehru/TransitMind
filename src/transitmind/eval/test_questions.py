@@ -1,7 +1,7 @@
 template = [
     {
         "question": "",
-        "expected_tools": ["parse_route_query", "find_route"],
+        "expected_tools": ["find_route"],
         "expected_args": {"find_route": {"start_stop_id": "", "end_stop_id": ""}},
         "category": "routing"
     },
@@ -22,181 +22,181 @@ template = [
 test_questions = [
   {
     "question": "What's the easiest way to get from Kew Gardens to Sheepshead Bay?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "F06", "end_stop_id": "D39"}},
     "category": "routing"
   },
   {
     "question": "I'm at Flushing-Main St and need to get to 34 St-Hudson Yards. What should I take?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "701", "end_stop_id": "726"}},
     "category": "routing"
   },
   {
     "question": "Need directions from Astoria-Ditmars Blvd to Union Square.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "R01", "end_stop_id": "R20"}},
     "category": "routing"
   },
   {
     "question": "How do I go from Jamaica Center to World Trade Center?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "G05", "end_stop_id": "E01"}},
     "category": "routing"
   },
   {
     "question": "Get me from Coney Island-Stillwell Av to Sheepshead Bay.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "D43", "end_stop_id": "D39"}},
     "category": "routing"
   },
   {
     "question": "What's the route from Bedford Av to 8 Av?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "L08", "end_stop_id": "L01"}},
     "category": "routing"
   },
   {
     "question": "How would I travel from Pelham Bay Park to Brooklyn Bridge-City Hall?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "601", "end_stop_id": "640"}},
     "category": "routing"
   },
   {
     "question": "I need to get from Far Rockaway-Mott Av to World Trade Center.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "H11", "end_stop_id": "E01"}},
     "category": "routing"
   },
   {
     "question": "Which way do I go from Woodlawn to Bowling Green?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "401", "end_stop_id": "420"}},
     "category": "routing"
   },
   {
     "question": "Can you find me a route from Kew Gardens to World Trade Center?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "F06", "end_stop_id": "E01"}},
     "category": "routing"
   },
   {
     "question": "How can I get from Flushing-Main St to Mets-Willets Point?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "701", "end_stop_id": "702"}},
     "category": "routing"
   },
   {
     "question": "Im trying to get from Kew Gardens to Sheepshed Bay. Which way should I go?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "F06", "end_stop_id": "D39"}},
     "category": "routing"
   },
   {
     "question": "Route me from Brighton Beach down to Coney Island-Stillwell Av.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "D40", "end_stop_id": "D43"}},
     "category": "routing"
   },
   {
     "question": "How do I get from Lexington Av/63 St to 72 St on the Q?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "B08", "end_stop_id": "Q03"}},
     "category": "routing"
   },
   {
     "question": "Whats the best way from Sheepshead Bay to Brighton Beach?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "D39", "end_stop_id": "D40"}},
     "category": "routing"
   },
   {
     "question": "How do I get from 34 St-Hudson Yards to Flushing-Main St?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "726", "end_stop_id": "701"}},
     "category": "routing"
   },
   {
     "question": "What's the best way from Jamaica Center to Kew Gardens?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "G05", "end_stop_id": "F06"}},
     "category": "routing"
   },
   {
     "question": "Can you route me from 8 Av to Bedford Av?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "L01", "end_stop_id": "L08"}},
     "category": "routing"
   },
   {
     "question": "Need to get from Sheepshead Bay to Lexington Av/63 St.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "D39", "end_stop_id": "B08"}},
     "category": "routing"
   },
   {
     "question": "How do I travel from World Trade Center to Kew Gardens?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "E01", "end_stop_id": "F06"}},
     "category": "routing"
   },
   {
     "question": "Find me a route from Brighton Beach to 72 St.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "D40", "end_stop_id": "Q03"}},
     "category": "routing"
   },
   {
     "question": "I'm at Mets-Willets Point. How do I get back to Flushing-Main St?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "702", "end_stop_id": "701"}},
     "category": "routing"
   },
   {
     "question": "Take me from Bowling Green to Woodlawn.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "420", "end_stop_id": "401"}},
     "category": "routing"
   },
   {
     "question": "Whats the route from Pelham Bay Park to Bowling Green?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "601", "end_stop_id": "420"}},
     "category": "routing"
   },
   {
     "question": "How can I get from Far Rockaway-Mott Av to Kew Gardens?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "H11", "end_stop_id": "F06"}},
     "category": "routing"
   },
   {
     "question": "How do I get from St George to Tottenville?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "S31", "end_stop_id": "S09"}},
     "category": "routing"
   },
   {
     "question": "What's the quickest way from Tompkinsville to Great Kills?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "S30", "end_stop_id": "S19"}},
     "category": "routing"
   },
   {
     "question": "I'm at Clifton. How do I get to Huguenot?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "S28", "end_stop_id": "S16"}},
     "category": "routing"
   },
   {
     "question": "Need to get from Great Kills to Arthur Kill.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "S19", "end_stop_id": "S11"}},
     "category": "routing"
   },
   {
     "question": "Im at New Dorp and trying to get to St George.",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {"find_route": {"start_stop_id": "S22", "end_stop_id": "S31"}},
     "category": "routing"
   },
@@ -505,7 +505,7 @@ test_questions = [
 
   {
     "question": "How do I go from Kew Gardens to Sheepshead Bay, and are there any issues on the F?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts"],
+    "expected_tools": ["find_route", "get_service_alerts"],
     "expected_args": {
       "find_route": {"start_stop_id": "F06", "end_stop_id": "D39"},
       "get_service_alerts": {"line": "F"}
@@ -514,7 +514,7 @@ test_questions = [
   },
   {
     "question": "I'm heading from Flushing-Main St to 34 St-Hudson Yards. What's the route, and is the 7 running normally?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts"],
+    "expected_tools": ["find_route", "get_service_alerts"],
     "expected_args": {
       "find_route": {"start_stop_id": "701", "end_stop_id": "726"},
       "get_service_alerts": {"line": "7"}
@@ -523,7 +523,7 @@ test_questions = [
   },
   {
     "question": "Get me from Jamaica Center to World Trade Center and let me know if the E has any problems.",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts"],
+    "expected_tools": ["find_route", "get_service_alerts"],
     "expected_args": {
       "find_route": {"start_stop_id": "G05", "end_stop_id": "E01"},
       "get_service_alerts": {"line": "E"}
@@ -532,7 +532,7 @@ test_questions = [
   },
   {
     "question": "Whats the best way from St George to Totenvile, and are there any SIR delys?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts"],
+    "expected_tools": ["find_route", "get_service_alerts"],
     "expected_args": {
       "find_route": {"start_stop_id": "S31", "end_stop_id": "S09"},
       "get_service_alerts": {"line": "SI"}
@@ -541,7 +541,7 @@ test_questions = [
   },
   {
     "question": "Can you route me from Astoria-Ditmars Blvd to Union Square and check whether the N has service changes?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts"],
+    "expected_tools": ["find_route", "get_service_alerts"],
     "expected_args": {
       "find_route": {"start_stop_id": "R01", "end_stop_id": "R20"},
       "get_service_alerts": {"line": "N"}
@@ -551,7 +551,7 @@ test_questions = [
 
   {
     "question": "How do I get from Flushing-Main St to Mets-Willets Point, and where are the 7 trains right now?",
-    "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
+    "expected_tools": ["find_route", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "701", "end_stop_id": "702"},
       "get_live_positions": {"line": "7"}
@@ -560,7 +560,7 @@ test_questions = [
   },
   {
     "question": "Route me from Bedford Av to 8 Av and show me where the L trains are.",
-    "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
+    "expected_tools": ["find_route", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "L08", "end_stop_id": "L01"},
       "get_live_positions": {"line": "L"}
@@ -569,7 +569,7 @@ test_questions = [
   },
   {
     "question": "Im trying to go from St George to Great Kils. Whats the route and where are the SIR trains curently?",
-    "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
+    "expected_tools": ["find_route", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "S31", "end_stop_id": "S19"},
       "get_live_positions": {"line": "SI"}
@@ -578,7 +578,7 @@ test_questions = [
   },
   {
     "question": "What's my route from Coney Island-Stillwell Av to Sheepshead Bay, and can you show me the Q train locations?",
-    "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
+    "expected_tools": ["find_route", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "D43", "end_stop_id": "D39"},
       "get_live_positions": {"line": "Q"}
@@ -587,7 +587,7 @@ test_questions = [
   },
   {
     "question": "Need directions from Pelham Bay Park to Brooklyn Bridge-City Hall, plus the current positions of the 6 trains.",
-    "expected_tools": ["parse_route_query", "find_route", "get_live_positions"],
+    "expected_tools": ["find_route", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "601", "end_stop_id": "640"},
       "get_live_positions": {"line": "6"}
@@ -643,7 +643,7 @@ test_questions = [
 
   {
     "question": "How do I get from Flushing-Main St to Mets-Willets Point, are there any 7 train delays, and where are the trains right now?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
+    "expected_tools": ["find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "701", "end_stop_id": "702"},
       "get_service_alerts": {"line": "7"},
@@ -653,7 +653,7 @@ test_questions = [
   },
   {
     "question": "Im going from St George to Tottenvile. Give me the route, check SIR servce, and show me were the trains are.",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
+    "expected_tools": ["find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "S31", "end_stop_id": "S09"},
       "get_service_alerts": {"line": "SI"},
@@ -663,7 +663,7 @@ test_questions = [
   },
   {
     "question": "Plan my trip from Bedford Av to 8 Av, tell me if the L has disruptions, and show its live train positions.",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
+    "expected_tools": ["find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "L08", "end_stop_id": "L01"},
       "get_service_alerts": {"line": "L"},
@@ -673,7 +673,7 @@ test_questions = [
   },
   {
     "question": "What's the route from Far Rockaway-Mott Av to World Trade Center? Also check the A for issues and tell me where the A trains are.",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
+    "expected_tools": ["find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "H11", "end_stop_id": "E01"},
       "get_service_alerts": {"line": "A"},
@@ -683,7 +683,7 @@ test_questions = [
   },
   {
     "question": "I need to travel from Great Kills to St George. What's the route, is SIR running okay, and where are the trains?",
-    "expected_tools": ["parse_route_query", "find_route", "get_service_alerts", "get_live_positions"],
+    "expected_tools": ["find_route", "get_service_alerts", "get_live_positions"],
     "expected_args": {
       "find_route": {"start_stop_id": "S19", "end_stop_id": "S31"},
       "get_service_alerts": {"line": "SI"},
@@ -785,7 +785,7 @@ test_questions = [
 
   {
     "question": "Kew Gardens Sheepshead Bay how do I get there",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {
       "find_route": {"start_stop_id": "F06", "end_stop_id": "D39"}
     },
@@ -793,7 +793,7 @@ test_questions = [
   },
   {
     "question": "St George Tottenvile route please",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {
       "find_route": {"start_stop_id": "S31", "end_stop_id": "S09"}
     },
@@ -801,7 +801,7 @@ test_questions = [
   },
   {
     "question": "need to go Flushing-Main St Mets-Willets Point",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {
       "find_route": {"start_stop_id": "701", "end_stop_id": "702"}
     },
@@ -809,7 +809,7 @@ test_questions = [
   },
   {
     "question": "how get from Bedford Av 8 Av",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {
       "find_route": {"start_stop_id": "L08", "end_stop_id": "L01"}
     },
@@ -817,7 +817,7 @@ test_questions = [
   },
   {
     "question": "Jamaica Center World Trade Center best way?",
-    "expected_tools": ["parse_route_query", "find_route"],
+    "expected_tools": ["find_route"],
     "expected_args": {
       "find_route": {"start_stop_id": "G05", "end_stop_id": "E01"}
     },

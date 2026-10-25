@@ -1,12 +1,10 @@
 from transitmind.graph.routing import find_route
 from transitmind.live.feed import get_live_positions, get_service_alerts
-from transitmind.resolver import parse_route_query
 
 tools_str_func = {
     "find_route": find_route,
     "get_live_positions": get_live_positions,
     "get_service_alerts": get_service_alerts,
-    "parse_route_query": parse_route_query
 }
 
 llm_tools = [
@@ -19,10 +17,10 @@ llm_tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "start_stop_id": {"type": "string", "description": "The stop ID of the start station"},
-                    "end_stop_id": {"type": "string", "description": "The stop ID of the end station"}
+                    "start_stop": {"type": "string", "description": "The stop name of the start station"},
+                    "end_stop": {"type": "string", "description": "The stop name of the end station"}
                 },
-                "required": ["start_stop_id", "end_stop_id"]
+                "required": ["start_stop", "end_stop"]
             }
         }
     },
@@ -55,20 +53,6 @@ llm_tools = [
                     "line": {"type": "string", "description": "The subway line for which you need the service alerts for"},
                 },
                 "required": ["line"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "parse_route_query",
-            "description": "Splits a natural language question, 'X' to 'Y' and returns a tuple of start and end stop IDs",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "The natural language question 'X' to 'Y'"},
-                },
-                "required": ["query"]
             }
         }
     },

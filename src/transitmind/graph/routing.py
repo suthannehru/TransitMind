@@ -1,8 +1,18 @@
 import networkx as nx
 import pickle
+from qdrant_client import QdrantClient
+from sentence_transformers import SentenceTransformer
 import structlog
+from transitmind.config import settings
 
 logger = structlog.getLogger(__name__)
+
+# Sentence Transformer
+# L6 means 6 transformer layers
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Connect to the Qdrant Vector Database
+client = QdrantClient(url=settings.qdrant_url)
 
 # Load the binary pickle file and populate the station graph
 with open("data/graph.pkl", "rb") as f:
@@ -15,10 +25,28 @@ def leg_sentence(start: str, end: str, legs: set, edge) -> str:
     )
     return f"From {start} take {head_sign} to {end}." 
 
-def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
+def find_stop_id(start_stop: str, end_stop: str) -> tuple[str, str]:
+
+    start_vector = model.encode(start_stop)
+    end_vector = model.encode(end_stop)
+
+    start_result = client.query_points(collection_name="stations", query=start_vector, limit=3)
+    end_result = client.query_points(collection_name="stations", query=end_vector, limit=3)
+
+    if len(start_result.points) and len(end_result.points):
+        start_stop_id = start_result.points[0].payload["stop_id"]
+        end_stop_id = end_result.points[0].payload["stop_id"]
+
+        return (start_stop_id, end_stop_id)
+    
+    return ('', '')
+
+def find_route(start_stop: str, end_stop: str) -> list[str]:
     """ Loads the station map and returns the shortest path between the stops as a list """
 
     route = None
+
+    start_stop_id, end_stop_id = find_stop_id(start_stop, end_stop)
 
     if start_stop_id in G and end_stop_id in G:
         try:
@@ -29,7 +57,6 @@ def find_route(start_stop_id: str, end_stop_id: str) -> list[str]:
         raise ValueError("Start and/or End Stop ID is invalid")        
 
     result = []
-    prev_stop_id = None
     legs = set()
     start_station = None
     end_station = None
