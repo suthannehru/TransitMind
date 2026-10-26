@@ -18,7 +18,8 @@ dependencies = [
    "openai",
    "mcp",
    "pandas",
-   "langgraph"
+   "langgraph",
+   "fastembed"
 ]
 [project.optional-dependencies]
 dev = [

@@ -1,6 +1,8 @@
+from fastembed import SparseTextEmbedding
 import networkx as nx
 import pickle
 from qdrant_client import QdrantClient
+from qdrant_client.models import Fusion, FusionQuery, Prefetch, QueryResponse, SparseVector
 from sentence_transformers import SentenceTransformer
 import structlog
 from transitmind.config import settings
@@ -14,6 +16,9 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 # Connect to the Qdrant Vector Database
 client = QdrantClient(url=settings.qdrant_url)
 
+# BM25 model
+bm25 = SparseTextEmbedding(model_name="Qdrant/bm25")
+
 # Load the binary pickle file and populate the station graph
 with open("data/graph.pkl", "rb") as f:
     G = pickle.load(f)
@@ -25,13 +30,32 @@ def leg_sentence(start: str, end: str, legs: set, edge) -> str:
     )
     return f"From {start} take {head_sign} to {end}." 
 
+def query_stop(stop: str) -> QueryResponse:
+
+    # Dense and Sparse Vector
+    dense_v = model.encode(stop).tolist()
+    sparse_v = next(bm25.query_embed(stop))
+
+    result = client.query_points(
+        collection_name="stations",
+        prefetch=[
+            Prefetch(query=dense_v, using="dense", limit=20),
+            Prefetch(
+                query=SparseVector(indices=sparse_v.indices.tolist(), values=sparse_v.values.tolist()),
+                using="sparse",
+                limit=20,
+            )
+        ],
+        query=FusionQuery(fusion=Fusion.RRF), 
+        limit=3
+    )
+
+    return result
+
 def find_stop_id(start_stop: str, end_stop: str) -> tuple[str, str]:
 
-    start_vector = model.encode(start_stop)
-    end_vector = model.encode(end_stop)
-
-    start_result = client.query_points(collection_name="stations", query=start_vector, limit=3)
-    end_result = client.query_points(collection_name="stations", query=end_vector, limit=3)
+    start_result = query_stop(start_stop)
+    end_result = query_stop(end_stop)    
 
     if len(start_result.points) and len(end_result.points):
         start_stop_id = start_result.points[0].payload["stop_id"]

@@ -1,6 +1,7 @@
+from fastembed import SparseTextEmbedding
 import pandas as pd
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import Distance, Modifier, PointStruct, SparseVector, SparseVectorParams, VectorParams
 from sentence_transformers import SentenceTransformer
 from transitmind.api.main import settings
 
@@ -54,7 +55,13 @@ def load_vector_db() -> None:
     # runs it through a trained neural network in batches.
     # Each string is returned a vector of fixed-amount of numbers. The fixed-amount is the dimensions.
     # Semantic search will check for similar strings in these dimension
-    embeddings = model.encode(station_description)
+    dense = model.encode(station_description)
+
+    # BM25 model
+    bm25 = SparseTextEmbedding(model_name="Qdrant/bm25")
+
+    # Generate Sparse Vectors with bm25 weights (keyword-search)
+    sparse = list(bm25.embed(station_description))
 
     # Connect to the Qdrant Vector Database
     client = QdrantClient(url=settings.qdrant_url)
@@ -63,14 +70,25 @@ def load_vector_db() -> None:
     # Distance between input is computed using the Distance.COSINE function
 
     if not client.collection_exists(collection_name="stations"):
-        client.recreate_collection(collection_name="stations", vectors_config=VectorParams(size=embeddings.shape[1], distance=Distance.COSINE))
+        client.recreate_collection(collection_name="stations", 
+                                   vectors_config={"dense": VectorParams(size=dense.shape[1], 
+                                                               distance=Distance.COSINE)},
+                                    sparse_vectors_config={"sparse": SparseVectorParams(modifier=Modifier.IDF)})
 
     client.upsert(collection_name="stations", 
                 points=[PointStruct(
                     id=index, 
-                    vector=embeddings[index].tolist(), payload=stations[ID]) for index, ID in enumerate(stations.keys())])
+                    vector={
+                        "dense": dense[index].tolist(),
+                        "sparse": SparseVector(
+                            indices=sparse[index].indices.tolist(),
+                            values=sparse[index].values.tolist()
+                        )
+                    },
+                    payload=stations[ID]
+                )
+                for index, ID in enumerate(stations.keys())])
 
 if __name__ == "__main__":
     load_vector_db()
-
 
