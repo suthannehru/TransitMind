@@ -4,7 +4,6 @@ import json
 import networkx as nx
 import random
 import structlog
-from transitmind.agent.graph import build_graph
 from transitmind.agent.run import run_agent, compute_cost
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
@@ -51,7 +50,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     user_message = f"Question: {question}\n\nTools and responses: {json.dumps(tool_responses)}\n\nAnswer: {answer}"
     messages = [{"role": "user", "content": user_message}]
 
-    response = client.messages.create(model="claude-sonnet-5-5",
+    response = client.messages.create(model=settings.llm_judge_model,
                            system=system_prompt,
                            max_tokens=2500,
                            messages=messages
@@ -60,15 +59,15 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     response_text = next((res.text for res in response.content if res.type == "text"), None)
 
     if not response_text:
-        return (False, ["No response from LLM-Judge"])
+        return (False, ["No response from LLM-Judge"], response.usage.input_tokens, response.usage.output_tokens)
 
     try:
         data = json.loads(response_text)
     except json.JSONDecodeError:
         logger.error("evals_response_error", output=response_text)
-        return (False, ["Unparseable judge output"])
+        return (False, ["Unparseable judge output"], response.usage.input_tokens, response.usage.output_tokens)
 
-    return (data.get("faithful", False), data.get("unsupported_claims", []))
+    return (data.get("faithful", False), data.get("unsupported_claims", []), response.usage.input_tokens, response.usage.output_tokens)
     
 
 def run_test_questions(limit: int) -> None:
@@ -86,13 +85,15 @@ def run_test_questions(limit: int) -> None:
 
         #LLM-Judge
         if response["tool_calls"]:
-            faithful, unsupported_claims = judge_faithfulness(tq["question"], response["tool_calls"], content)
+            faithful, unsupported_claims, llm_judge_input_tokens, llm_judge_output_tokens = judge_faithfulness(tq["question"], response["tool_calls"], content)
             if not faithful:
                 logger.warning("llm-judge-faithful-check", response=response, faithful=faithful, unsupported_claims=unsupported_claims)
             passes_category[tq["category"]]["judged"] += 1
             passes_category[tq["category"]]["faithful"] += 1 if faithful else 0
         else:
-            faithful, unsupported_claims = None, []
+            faithful, unsupported_claims, llm_judge_input_tokens, llm_judge_output_tokens = None, [], 0, 0
+
+        input_llm_judge_cost, output_llm_judge_cost = compute_cost(llm_judge_input_tokens, llm_judge_output_tokens, agent=False)
 
         output = tq.copy()
 
@@ -175,7 +176,11 @@ def run_test_questions(limit: int) -> None:
             "output_tokens": completion_tokens,
             "total_tokens": total_tokens,
             "input_cost": input_cost,
-            "output_cost": output_cost
+            "output_cost": output_cost,
+            "llm_judge_input_tokens": llm_judge_input_tokens,
+            "llm_judge_output_tokens": llm_judge_output_tokens,
+            "llm_judge_input_cost": input_llm_judge_cost,
+            "llm_judge_output_cost": output_llm_judge_cost
         })
         outputs.append(output)
 

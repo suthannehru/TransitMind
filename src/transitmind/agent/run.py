@@ -29,7 +29,7 @@ def run_agent(query: str) -> tuple[dict, str, int, int, int]:
 
     return (response, answer, prompt_tokens, completion_tokens, total_tokens)
 
-def compute_cost(input_tokens: int, output_tokens: int, agent:bool = True) -> tuple[float]:
+def compute_cost(input_tokens: int, output_tokens: int, agent:bool = True) -> tuple[float, float]:
 
     if agent:
         in_price = settings.input_price_per_million
