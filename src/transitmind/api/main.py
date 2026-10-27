@@ -19,9 +19,9 @@ app = FastAPI()
 @app.post("/ask")
 def ask(request: AskRequest):
     start_request = time.perf_counter()
-    prompt_tokens = 0; completion_tokens = 0; total_tokens = 0;
+    input_tokens = 0; output_tokens = 0; total_tokens = 0;
     try:
-        _, answer, prompt_tokens, completion_tokens, total_tokens = run_agent(request.question)
+        _, answer, input_tokens, output_tokens, total_tokens = run_agent(request.question)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
     except ResponseHandlingException as rhe:
@@ -30,13 +30,13 @@ def ask(request: AskRequest):
         request_latency = round((time.perf_counter() - start_request) * 1000)
         agent = "graph" if settings.use_graph else "loop"
 
-        input_cost, output_cost = compute_cost(input_tokens=prompt_tokens, output_tokens=completion_tokens)
+        input_cost, output_cost = compute_cost(input_tokens=input_tokens, output_tokens=output_tokens)
 
         logger.info("api_metrics", 
                     agent=agent,
                     latency_ms=request_latency,
-                    prompt_tokens=prompt_tokens,
-                    completion_tokens=completion_tokens,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
                     total_tokens=total_tokens,
                     input_cost_usd=input_cost,
                     output_cost_usd=output_cost)

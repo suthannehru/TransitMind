@@ -7,14 +7,14 @@ from typing import Any
 graph = build_graph()
 
 def run_agent(query: str) -> tuple[dict, str, int, int, int]:
-    prompt_tokens = 0; completion_tokens = 0; total_tokens = 0;
+    input_tokens = 0; output_tokens = 0; total_tokens = 0;
     if settings.use_graph:
         response = graph.invoke(initial_params(query))
         answer = response["messages"][-1]["content"]
 
         # Tokens Usage
-        prompt_tokens = response["prompt_tokens"]
-        completion_tokens = response["completion_tokens"]
+        input_tokens = response["prompt_tokens"]
+        output_tokens = response["completion_tokens"]
         total_tokens = response["total_tokens"]
 
     else:
@@ -23,11 +23,11 @@ def run_agent(query: str) -> tuple[dict, str, int, int, int]:
 
         # Tokens Usage
         tokens = response["tokens"]
-        prompt_tokens = tokens["prompt_tokens"]
-        completion_tokens = tokens["completion_tokens"]
+        input_tokens = tokens["prompt_tokens"]
+        output_tokens = tokens["completion_tokens"]
         total_tokens = tokens["total_tokens"]
 
-    return (response, answer, prompt_tokens, completion_tokens, total_tokens)
+    return (response, answer, input_tokens, output_tokens, total_tokens)
 
 def compute_cost(input_tokens: int, output_tokens: int, agent:bool = True) -> tuple[float, float]:
 

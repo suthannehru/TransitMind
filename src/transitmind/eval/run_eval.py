@@ -80,8 +80,8 @@ def run_test_questions(limit: int) -> None:
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
 
-        response, content, prompt_tokens, completion_tokens, total_tokens = run_agent(tq["question"])
-        input_cost, output_cost = compute_cost(prompt_tokens, completion_tokens)
+        response, content, input_tokens, output_tokens, total_tokens = run_agent(tq["question"])
+        input_cost, output_cost = compute_cost(input_tokens, output_tokens)
 
         #LLM-Judge
         if response["tool_calls"]:
@@ -172,8 +172,8 @@ def run_test_questions(limit: int) -> None:
             "faithful": faithful,
             "unsupported_claims": unsupported_claims,
             "passed": passed,
-            "input_tokens": prompt_tokens,
-            "output_tokens": completion_tokens,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
             "total_tokens": total_tokens,
             "input_cost": input_cost,
             "output_cost": output_cost,
