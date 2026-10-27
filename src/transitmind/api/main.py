@@ -1,15 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from qdrant_client.http.exceptions import ResponseHandlingException
 import structlog
 import time
-from transitmind.agent.graph import build_graph
-from transitmind.agent.loop import agent_loop
-from transitmind.agent.prompt import initial_params
+from transitmind.agent.run import compute_cost, run_agent
 from transitmind.config import settings
 
 logger = structlog.getLogger(__name__)
-
-graph = build_graph()
 
 class AskRequest(BaseModel):
     question: str
@@ -24,34 +21,16 @@ def ask(request: AskRequest):
     start_request = time.perf_counter()
     prompt_tokens = 0; completion_tokens = 0; total_tokens = 0;
     try:
-        if settings.use_graph:
-            final_state = graph.invoke(initial_params(request.question))
-            answer = final_state["messages"][-1]["content"]
-
-            # Tokens Usage
-            prompt_tokens = final_state["prompt_tokens"]
-            completion_tokens = final_state["completion_tokens"]
-            total_tokens = final_state["total_tokens"]
-
-        else:
-            response = agent_loop(request.question)
-            answer = response["content"]
-
-            # Tokens Usage
-            tokens = response["tokens"]
-            prompt_tokens = tokens["prompt_tokens"]
-            completion_tokens = tokens["completion_tokens"]
-            total_tokens = tokens["total_tokens"]
-
+        _, answer, prompt_tokens, completion_tokens, total_tokens = run_agent(request.question)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except ResponseHandlingException as rhe:
+        raise HTTPException(status_code=503, detail=str(rhe))
     finally:
         request_latency = round((time.perf_counter() - start_request) * 1000)
         agent = "graph" if settings.use_graph else "loop"
 
-        # Compute cost
-        input_cost = round((prompt_tokens / 1e6) * settings.input_price_per_million, 6)
-        output_cost = round((completion_tokens / 1e6) * settings.output_price_per_million, 6)
+        input_cost, output_cost = compute_cost(input_tokens=prompt_tokens, output_tokens=completion_tokens)
 
         logger.info("api_metrics", 
                     agent=agent,

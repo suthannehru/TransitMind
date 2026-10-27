@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     llm_model: str
     input_price_per_million: float
     output_price_per_million: float
+    llm_judge_model: str
+    llm_judge_input_price_per_million: float
+    llm_judge_output_price_per_million: float
 
     # Services Config
     qdrant_url: str

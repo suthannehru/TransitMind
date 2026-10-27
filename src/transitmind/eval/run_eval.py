@@ -5,15 +5,12 @@ import networkx as nx
 import random
 import structlog
 from transitmind.agent.graph import build_graph
-from transitmind.agent.loop import agent_loop
-from transitmind.agent.prompt import initial_params
+from transitmind.agent.run import run_agent, compute_cost
 from transitmind.config import settings
 from transitmind.eval.test_questions import test_questions
 from transitmind.graph.routing import G, find_stop_id
 
 logger = structlog.get_logger(__name__)
-
-graph = build_graph()
 
 def build_station_keys() -> dict[str, str]:
     """Maps each stop ID to one canonical ID shared by the stops in the same complex with the exact same name"""
@@ -74,7 +71,7 @@ def judge_faithfulness(question: str, tool_responses: list[dict], answer: str) -
     return (data.get("faithful", False), data.get("unsupported_claims", []))
     
 
-def run_test_questions(limit: int, use_graph: bool=True) -> None:
+def run_test_questions(limit: int) -> None:
     outputs = []
     passes_category = defaultdict(lambda: defaultdict(int))
 
@@ -84,12 +81,8 @@ def run_test_questions(limit: int, use_graph: bool=True) -> None:
     # Iterate through the tools call to compute precision, recall, and pass
     for tq in shuffled_tq:
 
-        if use_graph:
-            response = graph.invoke(initial_params(tq["question"]))
-            content = response["messages"][-1]["content"]
-        else:
-            response = agent_loop(tq["question"])
-            content = response["content"]
+        response, content, prompt_tokens, completion_tokens, total_tokens = run_agent(tq["question"])
+        input_cost, output_cost = compute_cost(prompt_tokens, completion_tokens)
 
         #LLM-Judge
         if response["tool_calls"]:
@@ -177,7 +170,12 @@ def run_test_questions(limit: int, use_graph: bool=True) -> None:
             "answer": content,
             "faithful": faithful,
             "unsupported_claims": unsupported_claims,
-            "passed": passed
+            "passed": passed,
+            "input_tokens": prompt_tokens,
+            "output_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+            "input_cost": input_cost,
+            "output_cost": output_cost
         })
         outputs.append(output)
 
@@ -189,4 +187,4 @@ def run_test_questions(limit: int, use_graph: bool=True) -> None:
 
 if __name__ == "__main__":
     question_limit = 130
-    run_test_questions(question_limit, use_graph=settings.use_graph)
+    run_test_questions(question_limit)
