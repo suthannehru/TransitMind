@@ -14,6 +14,26 @@ The plan is **MVP-first**: get a working end-to-end answer in phase 1, then laye
 - **Deploy:** Local Docker now, AWS path documented and designed-for (env-var config, structured JSON logs to stdout, no filesystem coupling in app code)
 - **Testing/eval:** pytest + RAGAS + LLM-as-judge
 
+## Status
+
+Last updated 2026-10-26.
+
+| Phase | Status | Notes |
+|---|---|---|
+| 0 Scaffold | Done | `.env.example` added; `pyproject.toml`, compose and config in place |
+| 1 MVP slice | Done | Superseded by the agent in phase 5 |
+| 2 Static knowledge base | Done | Station lookup is now hybrid (dense + BM25 with RRF), see the note under phase 2 |
+| 3 Live feed | Partial | `live/feed.py` fetches alerts and positions. `REDIS_URL` is configured but nothing reads or writes Redis, so there is no polling, caching or stale handling |
+| 4 Tools | Done | `find_route`, `get_service_alerts`, `get_live_positions`. The registry and schemas are in `tools.py`. There is no separate `vector_search` tool, since station lookup moved inside `find_route` |
+| 5 Agentic loop | Partial | Hand-written loop and a LangGraph agent both work, but only against OpenAI. The Claude/OpenAI provider interface is not built |
+| 6 Eval harness | Done | 130 questions, 121 / 130 passed, 102 / 109 faithful (see README) |
+| 7 MCP server | Untested | `mcp_server.py` registers the three tools. It has not been run against Claude Desktop and has no README section |
+| 8 Observability and safety | Partial | Latency, tokens and estimated cost are logged in `api_metrics`. No per-tool timeout, no fallback when Qdrant is down, no `FAILURE_MODES.md` |
+| 9 Cost writeup | Not started | |
+| 10 Docker and AWS design doc | Partial | Dockerfile and compose work, models are downloaded at build time. No `ARCHITECTURE.md` and no fresh-clone check yet |
+
+Open items outside the phases: exact-name matches can lose to near matches in station lookup (Bedford Av vs Bedford-Nostrand Avs), stations that share a name such as "72 St" are not disambiguated, and there is no `tests/` directory.
+
 ---
 
 ## Repo layout (target)
@@ -85,6 +105,8 @@ TransitMind/
 - Persist Qdrant to a Docker volume so restarts don't re-embed
 
 **Verify:** `python -m transitmind.static_kb.loader` completes in reasonable time. Query "L train stations in Brooklyn" retrieves relevant stops. `nx.shortest_path(g, "Bedford Av", "Times Sq-42 St")` returns a plausible path.
+
+**Added: hybrid retrieval.** Each station is stored with a dense vector (`all-MiniLM-L6-v2`) and a sparse BM25 vector (fastembed `Qdrant/bm25`, IDF modifier on) as named vectors in one Qdrant collection. `query_stop` in `graph/routing.py` prefetches the top 20 from each and merges them with reciprocal rank fusion. On the 130-question eval this moved pass rate from 109 to 121 (see README). The collection has to be recreated when the vector config changes.
 
 ---
 
