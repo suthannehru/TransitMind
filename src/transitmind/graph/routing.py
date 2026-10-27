@@ -2,6 +2,7 @@ from fastembed import SparseTextEmbedding
 import networkx as nx
 import pickle
 from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import ResponseHandlingException
 from qdrant_client.models import Fusion, FusionQuery, Prefetch, QueryResponse, SparseVector
 from sentence_transformers import SentenceTransformer
 import structlog
@@ -36,19 +37,23 @@ def query_stop(stop: str) -> QueryResponse:
     dense_v = model.encode(stop).tolist()
     sparse_v = next(bm25.query_embed(stop))
 
-    result = client.query_points(
-        collection_name="stations",
-        prefetch=[
-            Prefetch(query=dense_v, using="dense", limit=20),
-            Prefetch(
-                query=SparseVector(indices=sparse_v.indices.tolist(), values=sparse_v.values.tolist()),
-                using="sparse",
-                limit=20,
-            )
-        ],
-        query=FusionQuery(fusion=Fusion.RRF), 
-        limit=3
-    )
+    try:
+        result = client.query_points(
+            collection_name="stations",
+            prefetch=[
+                Prefetch(query=dense_v, using="dense", limit=20),
+                Prefetch(
+                    query=SparseVector(indices=sparse_v.indices.tolist(), values=sparse_v.values.tolist()),
+                    using="sparse",
+                    limit=20,
+                )
+            ],
+            query=FusionQuery(fusion=Fusion.RRF), 
+            limit=3
+        )
+    except ResponseHandlingException as e:
+        logger.error("qdrant_unavailable", err=str(e))
+        raise
 
     return result
 
